@@ -1,21 +1,34 @@
+/*
+ * Copyright (c) 2008-2013 Hao Cui<>,
+ *                         Liang Li<liliang010@gmail.com>,
+ *                         Ruijian Wang<>,
+ *                         Siran Lin<>.
+ *                         All rights reserved.
+ *
+ * This program is a free software; you can redistribute it and/or modify
+ * it under the terms of the BSD license. See LICENSE.txt for details.
+ *
+ * 2013/11/01
+ *
+ */
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include "pattern.h"
 
-#define l_2_r   2
-#define r_2_l   3
-#define u_2_d   0
-#define d_2_u   1
-#define lu_2_rd 4
-#define ld_2_ru 6
-#define ru_2_ld 5
-#define rd_2_lu 7
+#define l_2_r       2
+#define r_2_l       3
+#define u_2_d       0
+#define d_2_u       1
+#define lu_2_rd     4
+#define ld_2_ru     6
+#define ru_2_ld     5
+#define rd_2_lu     7
 
-#define Size 100
+#define Size        100
 
-/*方向变量*/
+/* Directions */
 pos_t transformation2[8] = {
   { 1,  0}, /* from left to right */
 
@@ -162,7 +175,7 @@ void CDFA::addpoint(move_t bestMove[], pos_t point)
     }
 }
 
-/*匹配子函数*/
+// Match function.
 void CDFA::match2(pos_t point, dfa_t *pdfa, move_t bestMove[], int direction, int dfa_num)
 {
     int p=0, j;
@@ -172,6 +185,7 @@ void CDFA::match2(pos_t point, dfa_t *pdfa, move_t bestMove[], int direction, in
         if (p == pdfa->last_state){
             for (j=0; j<pdfa->last_index; j++){
                 /*若为某一棋型两子构成双破招,则添加招法*/
+                // If it
                 if ( pdfa->indexes[j].mode == 2 ){
                     if (pdfa->indexes[j].offset[0] != pdfa->indexes[j].offset[1]){
                         bestMove[count].positions[0].x = pdfa->indexes[j].offset[0] * (-transformation2[direction].x) + point.x;

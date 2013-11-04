@@ -1,10 +1,22 @@
+/*
+ * Copyright (c) 2008-2013 Hao Cui<>,
+ *                         Liang Li<liliang010@gmail.com>,
+ *                         Ruijian Wang<>,
+ *                         Siran Lin<>.
+ *                         All rights reserved.
+ *
+ * This program is a free software; you can redistribute it and/or modify
+ * it under the terms of the BSD license. See LICENSE.txt for details.
+ *
+ * 2013/11/01
+ *
+ */
 
 #include "tools.h"
 #include "search_engine.h"
 
 CSearchEngine::CSearchEngine()
 {}
-//搜索引擎
 
 void CSearchEngine::before_search(char board[][GRID_NUM], char color, int alphabeta_depth){
 
@@ -41,11 +53,11 @@ double CSearchEngine::alpha_beta_search(int depth,double alpha,double beta,char 
     {
         if (ourColor == m_chess_type)
         {
-            //对手赢
+            // Opponent wins.
             return 0;
         } else
         {
-            //自己赢
+            // Self wins.
             return MININT + 1;
         }
     }
@@ -56,7 +68,7 @@ double CSearchEngine::alpha_beta_search(int depth,double alpha,double beta,char 
         else return m_evaluator.evaluation(m_chess_type,ourColor,m_board);
     }
 
-    //招法生成
+    // Get move list.
     n = m_move_gernerator.get_move_list(ourColor,moveList,m_board);
     if (n < 1)
     {
@@ -81,23 +93,18 @@ double CSearchEngine::alpha_beta_search(int depth,double alpha,double beta,char 
 
     for(int i = beg ; i< end ; i++)
     {
-        //执行招法
         m_board[moveList[i].positions[0].x][moveList[i].positions[0].y] = ourColor;
         m_board[moveList[i].positions[1].x][moveList[i].positions[1].y] = ourColor;
 
-        //递归搜索
-        // PVS algorithm
+        // Alpha beta search.
         val = -alpha_beta_search(depth-1,-beta,-alpha,ourColor^(char)3,&tempBest,&moveList[i]);
-        //if (alpha < val && val < beta && i > 0) {
-        //    val = -alpha_beta_search(depth-1,-beta,-alpha,ourColor^(char)3,&tempBest,&moveList[i]);
-        //}
         moveList[i].score = val;
 
-        //撤销招法
+        // Unmake the move.
         m_board[moveList[i].positions[0].x][moveList[i].positions[0].y] = NOSTONE;
         m_board[moveList[i].positions[1].x][moveList[i].positions[1].y] = NOSTONE;
 
-        //剪枝
+        // Alpha beta prune.
         if (val >= beta)
         {
             return val;
@@ -105,11 +112,9 @@ double CSearchEngine::alpha_beta_search(int depth,double alpha,double beta,char 
 
         pvs_beta = alpha + 1;
 
-        //已经找到必胜的招法
         if (val > alpha)
         {
             alpha = val;
-            //memcpy(bestMove, &moveList[i], sizeof(move_t));
             bestMove->positions[0].x = moveList[i].positions[0].x;
             bestMove->positions[0].y = moveList[i].positions[0].y;
             bestMove->positions[1].x = moveList[i].positions[1].x;

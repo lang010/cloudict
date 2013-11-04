@@ -1,7 +1,21 @@
+/*
+ * Copyright (c) 2008-2013 Hao Cui<>,
+ *                         Liang Li<liliang010@gmail.com>,
+ *                         Ruijian Wang<>,
+ *                         Siran Lin<>.
+ *                         All rights reserved.
+ *
+ * This program is a free software; you can redistribute it and/or modify
+ * it under the terms of the BSD license. See LICENSE.txt for details.
+ *
+ * 2013/11/01
+ *
+ */
+
 #ifndef DEBUGPRINT_H_
 #define DEBUGPRINT_H_
 
-#include "structs.h"
+#include "defines.h"
 
 // Point (x, y) if in the valid position of the board.
 #define IsValidPos(x,y)        ((x>0&&x<GRID_NUM-1 )&&(y>0&&y<GRID_NUM-1))
@@ -20,6 +34,8 @@ int send_msg_to_slave(char* buf, int slave = 0);
 int send_msg_to_master(char* buf);
 int recv_msg_from_slave(char* buf,int len, int slave = 0);
 int recv_msg_from_master(char* buf, int len);
+
+int get_msg(char* buf, int maxLen);
 
 void print_board(char tempboard[][GRID_NUM], move_t* preMove);
 void print_score(move_one_t *moveList,int n);

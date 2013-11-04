@@ -1,3 +1,16 @@
+/*
+ * Copyright (c) 2008-2013 Hao Cui<>,
+ *                         Liang Li<liliang010@gmail.com>,
+ *                         Ruijian Wang<>,
+ *                         Siran Lin<>.
+ *                         All rights reserved.
+ *
+ * This program is a free software; you can redistribute it and/or modify
+ * it under the terms of the BSD license. See LICENSE.txt for details.
+ *
+ * 2013/11/01
+ *
+ */
 
 #include "evaluation.h"
 #include "tools.h"
@@ -23,9 +36,9 @@ void CEvaluation::set_situation(char board[][GRID_NUM])
 
     //对每个点算棋形
     int bd[4],wd[4];
-    for (char x = 1 ; x < 20 ; x++)
+    for (int x = 1 ; x < 20 ; x++)
     {
-        for (char y = 1 ; y < 20 ; y++)
+        for (int y = 1 ; y < 20 ; y++)
         {
             if (board[x][y] != NOSTONE) 
             {
@@ -138,9 +151,9 @@ void CEvaluation::set_situation(char board[][GRID_NUM])
     return ;
 }
 
-void CEvaluation::set_situation_for_one_direction(char x,char y ,short countx,short county,int dir, char board[][GRID_NUM])
+void CEvaluation::set_situation_for_one_direction(int x, int y ,short countx,short county,int dir, char board[][GRID_NUM])
 {
-    int currColor = board[x][y];
+    char currColor = board[x][y];
     int i = x,j = y;
     int colorN = 1,noneN = 0;
     int longContinue = 1;
@@ -149,15 +162,17 @@ void CEvaluation::set_situation_for_one_direction(char x,char y ,short countx,sh
     int lLongest = 0;
 
     int tempLong = 1;
-    int tempLongNone = 0;
     int mid = 0;
     int rI,rJ,lI,lJ;
     //int total = 0;
     int rEnd = 0,lEnd = 0;
 
-    pos_t posList[20] = {0};
-    pos_t posRList[20] = {0};
-    pos_t posLList[20] = {0};
+    pos_t posList[20] ;
+    pos_t posRList[20] ;
+    pos_t posLList[20] ;
+    memset(posList, 0, sizeof(posList));
+    memset(posRList, 0, sizeof(posRList));
+    memset(posLList, 0, sizeof(posLList));
     posList[0].x = 1;
     posList[1].x = x;
     posList[1].y = y;

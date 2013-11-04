@@ -1,7 +1,20 @@
+/*
+ * Copyright (c) 2008-2013 Hao Cui<>,
+ *                         Liang Li<liliang010@gmail.com>,
+ *                         Ruijian Wang<>,
+ *                         Siran Lin<>.
+ *                         All rights reserved.
+ *
+ * This program is a free software; you can redistribute it and/or modify
+ * it under the terms of the BSD license. See LICENSE.txt for details.
+ *
+ * 2013/11/01
+ *
+ */
 
 #include "tools.h"
 
-char g_log_file_name[] = "conn.log";
+char g_log_file_name[] = "engine.log";
 
 void init_board(char board[][GRID_NUM])
 {
@@ -34,13 +47,13 @@ bool is_win_by_premove(char board[][GRID_NUM], move_t *preMove)
 {
     int count = 0,i,j,n,m;
 
-    //ÅÐ¶ÏµÚÒ»¸öµã
+    // The first point.
     n = i = preMove->positions[0].x;
     m = j = preMove->positions[0].y;
-    //Ë®Æ½·½Ïò
+    // Horizon direction.
     count = 0;
     if (board[n][m] == BORDER
-        || board[n][m] == NOSTONE)
+            || board[n][m] == NOSTONE)
     {
         return false;
     }
@@ -60,7 +73,7 @@ bool is_win_by_premove(char board[][GRID_NUM], move_t *preMove)
         return true;
     }
 
-    //Ð±·½Ïò
+    // Left up direction.
     count = 0;
     i = n;j = m;
     while ( board[i][j] == board[n][m])
@@ -82,7 +95,7 @@ bool is_win_by_premove(char board[][GRID_NUM], move_t *preMove)
         return true;
     }
 
-    //ÊúÖ±·½Ïò
+    // Vertical direction.
     count = 0;
     i = n;j = m;
     while ( board[i][j] == board[n][m])
@@ -101,7 +114,7 @@ bool is_win_by_premove(char board[][GRID_NUM], move_t *preMove)
         return true;
     }
 
-    //Ð±·½Ïò
+    // Down left direction.
     count = 0;
     i = n;j = m;
     while ( board[i][j] == board[n][m])
@@ -123,15 +136,15 @@ bool is_win_by_premove(char board[][GRID_NUM], move_t *preMove)
         return true;
     }
 
-    //ÅÐ¶ÏµÚ¶þ¸öµã
+    // The second point.
     n = i = preMove->positions[1].x;
     m = j = preMove->positions[1].y;
     if (board[n][m] == BORDER
-        || board[n][m] == NOSTONE)
+            || board[n][m] == NOSTONE)
     {
         return false;
     }
-    //Ë®Æ½·½Ïò
+    // Horizon direction.
     count = 0;
     while ( board[i][j] == board[n][m])
     {
@@ -149,7 +162,7 @@ bool is_win_by_premove(char board[][GRID_NUM], move_t *preMove)
         return true;
     }
 
-    //Ð±·½Ïò
+    // Up left direction.
     count = 0;
     i = n;j = m;
     while ( board[i][j] == board[n][m])
@@ -171,7 +184,7 @@ bool is_win_by_premove(char board[][GRID_NUM], move_t *preMove)
         return true;
     }
 
-    //ÊúÖ±·½Ïò
+    // Vertical direction.
     count = 0;
     i = n;j = m;
     while ( board[i][j] == board[n][m])
@@ -190,7 +203,7 @@ bool is_win_by_premove(char board[][GRID_NUM], move_t *preMove)
         return true;
     }
 
-    //Ð±·½Ïò
+    // Down left direction.
     count = 0;
     i = n;j = m;
     while ( board[i][j] == board[n][m])
@@ -212,23 +225,36 @@ bool is_win_by_premove(char board[][GRID_NUM], move_t *preMove)
         return true;
     }
 
-    //Ã»ÓÐÁ¬ÁùµÄ×Ó
     return false;
+}
+
+int get_msg(char* buf, int maxLen) {
+    if (buf == NULL)
+        return -1;
+    int len;
+    char c;
+    for (len = 0; len < maxLen; len++) {
+        c = getchar();
+        if (c == '\n')
+            break;
+        buf[len] = c;
+    }
+    buf[len] = 0;
+    return len;
 }
 
 int log_to_file(char* msg) 
 {
     FILE* file = fopen(g_log_file_name, "a");
-  static char buf[32];
     if (file == NULL)
     {
-    printf("Error: Can't open log file - %s\n", g_log_file_name);
+        printf("Error: Can't open log file - %s\n", g_log_file_name);
         return -1;
     }
     time_t tm = time(NULL);
-  char* ptr;
-  ptr = ctime(&tm);
-  ptr[strlen(ptr) - 1] = 0;
+    char* ptr;
+    ptr = ctime(&tm);
+    ptr[strlen(ptr) - 1] = 0;
     fprintf(file, "[%s] - %s\n", ptr, msg);
     fclose(file);
 
@@ -238,7 +264,7 @@ int log_to_file(char* msg)
 int move2msg(move_t* move, char* msg)
 {
     if (move->positions[0].x == move->positions[1].x
-        && move->positions[0].y == move->positions[1].y)
+            && move->positions[0].y == move->positions[1].y)
     {
         msg[0] = 'S' - move->positions[0].x + 1;
         msg[1] = move->positions[0].y + 'A' - 1;
@@ -291,13 +317,13 @@ void print_board(char board[21][21], move_t* preMove)
     printf("  ");
     for (int i = 1 ; i < GRID_NUM - 1 ; i++)
     {
-        printf("%2d",i);
+        printf("%2c", 'A' + i - 1);
     }
     printf("\n");
     int x,y;
     for (int i = 1 ; i < GRID_NUM - 1 ; i++)
     {
-        printf("%2d", i);
+        printf("%2c", 'T' - i);
         for (int j = 1 ; j < GRID_NUM - 1; j++)
         {
             //x = j;
@@ -329,8 +355,15 @@ void print_board(char board[21][21], move_t* preMove)
                     break;
             }
         }
+        printf("%2c", 'T' - i);
         printf("\n");
     }
+    printf("  ");
+    for (int i = 1 ; i < GRID_NUM - 1 ; i++)
+    {
+        printf("%2c", 'A' + i - 1);
+    }
+    printf("\n");
 }
 
 void print_score(move_one_t *moveList,int n)

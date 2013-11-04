@@ -1,3 +1,16 @@
+/*
+ * Copyright (c) 2008-2013 Hao Cui<>,
+ *                         Liang Li<liliang010@gmail.com>,
+ *                         Ruijian Wang<>,
+ *                         Siran Lin<>.
+ *                         All rights reserved.
+ *
+ * This program is a free software; you can redistribute it and/or modify
+ * it under the terms of the BSD license. See LICENSE.txt for details.
+ *
+ * 2013/11/01
+ *
+ */
 
 #include "vcf_search.h"
 #include "tools.h"
@@ -793,7 +806,7 @@ int CVCFSearch::vcf_hash_check(HashNode node)
 {
     int i, t;
     int dep=node.dep;
-    int hash=node.hash;
+    unsigned int hash=node.hash;
     int p=hash%HASHSIZE;
     char tmpboard[GRID_NUM][GRID_NUM];
     memcpy(tmpboard,m_org_board,sizeof(tmpboard));

@@ -1,17 +1,39 @@
+/*
+ * Copyright (c) 2008-2013 Hao Cui<>,
+ *                         Liang Li<liliang010@gmail.com>,
+ *                         Ruijian Wang<>,
+ *                         Siran Lin<>.
+ *                         All rights reserved.
+ *
+ * This program is a free software; you can redistribute it and/or modify
+ * it under the terms of the BSD license. See LICENSE.txt for details.
+ *
+ * 2013/11/01
+ *
+ */
 
 #include "game_engine.h"
 #include "tools.h"
 
 
 CGameEngine::CGameEngine() {
-    strcpy(m_engine_name, "cloudict.connect6");
+    strcpy(m_engine_name, "Cloudict.Connect6");
 }
 
-int CGameEngine::init() {
+int CGameEngine::init(char* name) {
+
+    if (name != NULL && strlen(name) > 0) {
+        if (strlen(name) < MSG_LENGTH) {
+            strcpy(m_engine_name, name);
+        }else {
+            printf("To long Engine Name: %s, should less than: %d\n",
+                    name, MSG_LENGTH);
+        }
+    }
 
     m_alphabeta_depth = 6;
 
-    m_vcf_search.init(); //VCFÄ£Ê½³õÊ¼»¯
+    m_vcf_search.init(); // VCF engine init the dfa, only once when engine started.
     init_game();
 
     return 0;
@@ -22,53 +44,66 @@ void CGameEngine::init_game() {
     m_vcf_search.init_game();
 }
 
+void CGameEngine::on_help() {
+    printf(
+        "On help for GameEngine %s\n\
+            name        - print the name of the Game Engine.\n\
+            print       - print the board.\n\
+            exit/quit   - quit the game.\n\
+            black XXXX  - place the black stone on the position XXXX in the board.\n\
+            white XXXX  - place the write stone on the XXXX in the board, X is the A-S.\n\
+            next        - the engine will search the move for next step.\n\
+            move XXXX   - tell the engine that the opponent take the move XXXX,\n\
+                            and the engine will search the move for next step.\n\
+            new black   - start a new game and set the engine to Black player.\n\
+            new white   - start a new game and set it to White.\n\
+            depth d     - set the alpha beta search depth, default is 6.\n\
+            help        - print this help.\n", m_engine_name);
+}
+
 int CGameEngine::run()
 {
-    char msg[MSG_LENGTH] = {0};        //±£´æ½ÓÊÕµ½µÄÏûÏ¢
+    char msg[MSG_LENGTH] = {0};
 
+    on_help();
     while (1)
     {
-        //Ñ­»·½ÓÊÕ²ÃÅÐÆ½Ì¨·¢ËÍµÄÏûÏ¢
-        //×¢ÒâÐèÒª·¢ËÍµÄ×Ö·û´®Ó¦¸ÃÒÔ'\n'½áÊø£¬²ÃÅÐÆ½Ì¨²Å»áÈÏÎªÊÇÒ»´ÎÍêÕûµÄÊäÈë
-        //·¢ËÍÍêÐèÒªµ÷ÓÃfflush(stdout)Çå¿ÕÊä³ö»º³åÇø£¬Ê¹×Ö·û´®Á¢¿ÌÊä³öµ½²ÃÅÐÆ½Ì¨
-        // msg: name?, exit/quit, print, new, next, black XXXX, white XXXX, move XXXX
-        //        back, forward...
+        // Take in the commands.
         memset(msg, 0, sizeof(msg));
-        fgets(msg, MSG_LENGTH, stdin);
+        get_msg(msg, MSG_LENGTH);
         log_to_file(msg);
-        if (strcmp(msg,"name?") == 0)
+        if (strcmp(msg,"name") == 0)
         {
-            //name?
+            //name
             printf("%s\n", m_engine_name);
             fflush(stdout);
             continue;
-        }
+        } else
         if (strcmp(msg, "exit") == 0 
                 || strcmp(msg, "quit") == 0)
         {
             break;
-        }
+        } else
         if (strcmp(msg, "print") == 0)
         {
             print_board(m_board, &m_best_move);
-        }
-
-        //µ÷ÊÔÓÃ
+        } else
         if (strncmp(msg,"black", 5) == 0)
         {
+            // Set the position by black stone
             msg2move(&msg[6], &m_best_move);
             make_move(m_board, &m_best_move, BLACK);
             m_chess_type = BLACK;
             continue;
-        }
+        } else
         if (strncmp(msg,"white", 5) == 0)
         {
+            // Set the position by white stone
             msg2move(&msg[6], &m_best_move);
             make_move(m_board, &m_best_move, WHITE);
             m_chess_type = WHITE;
             continue;
-        }
-
+        } else
         if (strcmp(msg,"next") == 0)
         {
             m_chess_type = m_chess_type ^ 3;
@@ -80,12 +115,11 @@ int CGameEngine::run()
                 printf("%s\n",msg);
             }
             continue;
-        }
-
+        } else
         if (strncmp(msg,"new", 3) == 0)
         {
-            //new
-            init_game();//³õÊ¼»¯ÆåÅÌ
+            //New game.
+            init_game();// Begin a new game.
             if (strcmp(&msg[4],"black") == 0)
             {
                 //new black
@@ -104,7 +138,7 @@ int CGameEngine::run()
             }
 
             continue;
-        }
+        } else
         if (strncmp(msg,"move", 4) == 0)
         {
             //move
@@ -118,13 +152,28 @@ int CGameEngine::run()
             }
             if (search_a_move(m_chess_type,&m_best_move))
             {
-                //»ñµÃ×Å·¨µÄ×ø±ê
+                // Search for a good move and take it.
                 move2msg(&m_best_move, &msg[5]);
                 make_move(m_board, &m_best_move, m_chess_type);
                 printf("%s\n",msg);
                 fflush(stdout);
             }
-        }//move
+        } else
+        if (strncmp(msg, "depth", 5) == 0) {
+            fflush(stdin);
+            fflush(stdout);
+            int d = 0;
+            sscanf(&msg[5], "%d", &d);
+            if (d > 0 && d < 10) {
+                m_alphabeta_depth = d;
+            }
+            fflush(stdout);
+            printf("Set the search depth to %d.\n\n", m_alphabeta_depth);
+            fflush(stdout);
+        } else
+        if (strncmp(msg, "help", 4) == 0) {
+            on_help();
+        }
     }
     return 0;
 }
@@ -134,7 +183,7 @@ bool CGameEngine::search_a_move(char ourColor,move_t* bestMove)
     double score = 0;
     bool vcf = false;
 
-    //VCFËÑË÷²¿·Ö£¬ËÑË÷³É¹¦·µ»ØÕÐ·¨
+    // VCF Search first, for the position.
     clock_t start,end;
     start = clock();
     m_vcf_search.before_search(m_board, m_chess_type);
@@ -144,12 +193,14 @@ bool CGameEngine::search_a_move(char ourColor,move_t* bestMove)
     printf("VCF time : %.3lf\n", (double)(end - start)/CLOCKS_PER_SEC);
     printf("VCF node : %d\n\n", m_vcf_search.m_vcf_node);
 
+    // Check if wins.
     if (vcf)
     {
         printf ( " Win by VCF.\n");
         return true;
     }
 
+    // Alpha beta search continue, if VCF search failed.
     start = clock();
     m_search_engine.before_search(m_board, m_chess_type, m_alphabeta_depth);
     score = m_search_engine.alpha_beta_search(m_alphabeta_depth,MININT,MAXINT,ourColor,bestMove,bestMove);
@@ -166,8 +217,4 @@ bool CGameEngine::search_a_move(char ourColor,move_t* bestMove)
     return true;
 }
 
-void move_back()
-{
-    return ;
-}
 

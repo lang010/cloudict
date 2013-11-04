@@ -1,38 +1,50 @@
+/*
+ * Copyright (c) 2008-2013 Hao Cui<>,
+ *                         Liang Li<liliang010@gmail.com>,
+ *                         Ruijian Wang<>,
+ *                         Siran Lin<>.
+ *                         All rights reserved.
+ *
+ * This program is a free software; you can redistribute it and/or modify
+ * it under the terms of the BSD license. See LICENSE.txt for details.
+ *
+ * 2013/11/01
+ *
+ */
 
-#include "move_generator.h"
 #include "tools.h"
-#include "search_engine.h"
+#include "move_generator.h"
 
-//着法生成用到的分数
-#define score_1 15000
-#define score_1_5 5005
-#define score_2 5000
-#define score_2_5 4995
-#define score_2_6 2000
-#define score_2_9 900
-#define score_3 800
-#define score_3_1 750
-#define score_3_2 300
-#define score_3_3 200
-#define score_3_5 145
-#define score_3_6 144
-#define score_4 140
-#define score_4_5 139
-#define score_4_6 137
-#define score_4_7 90
-#define score_4_8 80
-#define score_5 60
-#define score_5_5 50
-#define score_6 40
-#define score_6_5 35
-#define score_6_6 30
-#define score_6_7 25
-#define score_7 8
-#define score_8 3
-#define score_9 1
+// Scores for the move generator.
+#define score_1         15000
+#define score_1_5       5005
+#define score_2         5000
+#define score_2_5       4995
+#define score_2_6       2000
+#define score_2_9       900
+#define score_3         800
+#define score_3_1       750
+#define score_3_2       300
+#define score_3_3       200
+#define score_3_5       145
+#define score_3_6       144
+#define score_4         140
+#define score_4_5       139
+#define score_4_6       137
+#define score_4_7       90
+#define score_4_8       80
+#define score_5         60
+#define score_5_5       50
+#define score_6         40
+#define score_6_5       35
+#define score_6_6       30
+#define score_6_7       25
+#define score_7         8
+#define score_8         3
+#define score_9         1
 
-#define V 0
-#define T 1
+#define V               0
+#define T               1
 
 
 CMoveGenerator::CMoveGenerator()
@@ -80,7 +92,7 @@ int CMoveGenerator::get_move_list(char ourColor , move_t* moveList, char board[]
 
     for(i = 0 ; i< numOfOne ; i++)
     {
-        //下一子
+        // Get the second stone for a move.
         m_pos_to_update_special.clear();
 
         board[moveOne[i].x][moveOne[i].y] = ourColor;
@@ -92,7 +104,7 @@ int CMoveGenerator::get_move_list(char ourColor , move_t* moveList, char board[]
 
         moveOneCopy[i].score = 0;
 
-        //为第二个子评分
+        // Set scores for the second stone.
         m = set_score(ourColor,2,newMoveOne,board);
 
         numOfTwo = sort_merge(moveTwo,moveOneCopy,n,newMoveOne,m);
@@ -109,7 +121,7 @@ int CMoveGenerator::get_move_list(char ourColor , move_t* moveList, char board[]
 
         board[moveOne[i].x][moveOne[i].y] = NOSTONE;
 
-        //取出招法
+        // Take the second store to make the moves.
         int    moreTwoMove = 0;
 
         for(j = 0 ; j < m && moveTwo[j].score; j++)
@@ -152,8 +164,6 @@ int CMoveGenerator::get_move_list(char ourColor , move_t* moveList, char board[]
 
     return count;
 }
-
-int map[GRID_NUM][GRID_NUM];
 
 int CMoveGenerator::init_valuable_space(char board[][GRID_NUM]) {
     memset(map,0,sizeof(map));
@@ -404,10 +414,9 @@ bool CMoveGenerator::extend_pos(char x, char y, char board[][GRID_NUM])
 int CMoveGenerator::set_score( char ourColor , int step , move_one_t moveList[], char board[][GRID_NUM] )
 {
     int count = 0 , score = 0;
-    char i,j;
-    int maxCount ;        //返回招法序列的最大有效值,之前为已经排序的
+    int i,j;
+    int maxCount ;        // Return the max valid points in the board, sorted by their scores.
 
-    //double tempTime = timeGetTime();
     int maxI;
     move_one_t tempMove;
 
@@ -423,7 +432,7 @@ int CMoveGenerator::set_score( char ourColor , int step , move_one_t moveList[],
         {
             for (j = 1 ; j < GRID_NUM - 1 ; j++)
             {
-                if (map[i][j] == (char)1)
+                if (map[i][j] == 1)
                 {
                     score = set_score_single( ourColor , i , j , step, board );
 
@@ -443,7 +452,7 @@ int CMoveGenerator::set_score( char ourColor , int step , move_one_t moveList[],
             if (mapflag[it->x][it->y] || board[it->x][it->y] != NOSTONE)
             {
                 continue;
-            } 
+            }
             else
             {
                 mapflag[it->x][it->y] = 1;
@@ -459,7 +468,7 @@ int CMoveGenerator::set_score( char ourColor , int step , move_one_t moveList[],
             if (mapflag[it->x][it->y] || board[it->x][it->y] != NOSTONE)
             {
                 continue;
-            } 
+            }
             else
             {
                 mapflag[it->x][it->y] = 1;
@@ -604,7 +613,7 @@ int CMoveGenerator::set_by_direction1 ( char color , int x , int y , int step, c
     if ( color == 1 )
     {
         self = 1;
-        enemy = 2; 
+        enemy = 2;
     }
     else
     {
@@ -801,215 +810,72 @@ int CMoveGenerator::set_by_direction1 ( char color , int x , int y , int step, c
 
     if ( defSuc )
     {
-    if ( connectCount == 1 )
-    {
-        score += score_9;
-    }
-
-    // 堵四
-    if ( connectCount == 4 )
-    {
-        if ( middleCheck[0] && middleCheck[1] )
+        if ( connectCount == 1 )
         {
-            score += score_2;
-            if ( step == 1 )
-            {
-                if ( Ocount <= 2 )
-                {
-                    m_dead_four_plus = 1;
-                }
-                add_new_pos_for_two(x,y);
-            }
+            score += score_9;
         }
-        else
+
+        // Block the four stones.
+        if ( connectCount == 4 )
         {
-            if ( step == 2 )
-            {
-                if ( defVT == V )
-                {
-                    score += score_2;
-                }
-            }
-            else
+            if ( middleCheck[0] && middleCheck[1] )
             {
                 score += score_2;
-                if ( defVT == V )
-                {
-                    m_dead_four_plus = 1;
-                }
-                add_new_pos_for_two(x,y);
-            }
-        }
-    }
-    if ( connectCount == 1 )
-    {
-        if ( board[x-1][y] == 0 && board[x-2][y] == enemy && board[x-3][y] == 0 && board[x-4][y] == 0 && board[x-5][y] == enemy && board[x-6][y] == 0 && board[x-7][y] == 0 )
-        {
-            if ( step == 2 && m_dead_four_plus == 1 )
-            {
-                score += score_4_7; //90
-            }
-            else
-            {
-                score += score_5;
                 if ( step == 1 )
                 {
+                    if ( Ocount <= 2 )
+                    {
+                        m_dead_four_plus = 1;
+                    }
                     add_new_pos_for_two(x,y);
                 }
             }
-        }
-        if ( board[x+1][y] == 0 && board[x+2][y] == enemy && board[x+3][y] == 0 && board[x+4][y] == 0 && board[x+5][y] == enemy && board[x+6][y] == 0 && board[x+7][y] == 0 )
-        {
-            if ( step == 2 && m_dead_four_plus == 1 )
-            {
-                score += score_4_7; //90
-            }
             else
             {
-                score += score_5;
-                if ( step == 1 )
+                if ( step == 2 )
                 {
-                    add_new_pos_for_two(x,y);
-                }
-            }
-        }
-    }
-        
-    //堵二
-    if ( connectCount == 2 )
-    {
-        if ( middleCheck[0] && middleCheck[1] && board[highLevel][y] == 0 && board[lowLevel][y] == 0 && Ocount <= 2 )
-        {
-            if ( step == 2 && m_dead_four_plus == 1 )
-            {
-                score += score_4; //90
-            }
-            else
-            {
-                score += score_5;
-                if ( step == 1 )
-                {
-                    add_new_pos_for_two(x,y);
-                }
-            }
-        }
-        if ( middleCheck[0] && !middleCheck[1] && board[highLevel][y] == 0 )
-        {
-            if ( board[x-1][y] == 0 && board[x-2][y] == 0 )
-            {
-                score += 0;
-            }
-            else
-            {
-                if ( board[x-1][y] == enemy && board[x-2][y] == 0 && board[x-3][y] == 0 && board[x-4][y] == enemy && board[x-5][y] == 0 && ( board[x-6][y] == self || board[x-6][y] == 3 ) )
-                {
-                    score += 0;
+                    if ( defVT == V )
+                    {
+                        score += score_2;
+                    }
                 }
                 else
                 {
-                    if ( board[x-1][y] == 0 && board[x-2][y] == enemy && board[x-3][y] == 0 && board[x-4][y] == enemy && board[x-5][y] == 0 && ( board[x-6][y] == self || board[x-6][y] == 3 ) )
+                    score += score_2;
+                    if ( defVT == V )
                     {
-                        score += 0;
+                        m_dead_four_plus = 1;
                     }
-                    else
-                    {
-                        if ( board[x-1][y] == enemy && ( board[x+1][y] == self || board[x+1][y] == 3 ) )
-                        {
-                            score += 0;
-                        }
-                        else
-                        {
-                            if ( step == 2 && m_dead_four_plus == 1 )
-                            {
-                                score += score_4; //90
-                            }
-                            else
-                            {
-                                score += score_5;
-                                if ( step == 1 )
-                                {
-                                    add_new_pos_for_two(x,y);
-                                }
-                            }
-                        }
-                    }
+                    add_new_pos_for_two(x,y);
                 }
             }
         }
-        if ( middleCheck[1] && !middleCheck[0] && board[lowLevel][y] == 0 )
+        if ( connectCount == 1 )
         {
-            if ( board[x+1][y] == 0 && board[x+2][y] == 0 )
+            if ( board[x-1][y] == 0 && board[x-2][y] == enemy && board[x-3][y] == 0 && board[x-4][y] == 0 && board[x-5][y] == enemy && board[x-6][y] == 0 && board[x-7][y] == 0 )
             {
-                score += 0;
-            }
-            else
-            {
-                if ( board[x+1][y] == enemy && board[x+2][y] == 0 && board[x+3][y] == 0 && board[x+4][y] == enemy && board[x+5][y] == 0 && ( board[x+6][y] == self || board[x+6][y] == 3 ) )
-                {
-                    score += 0;
-                }
-                else
-                {
-                    if ( board[x+1][y] == 0 && board[x+2][y] == enemy && board[x+3][y] == 0 && board[x+4][y] == enemy && board[x+5][y] == 0 && ( board[x+6][y] == self || board[x+6][y] == 3 ) )
-                    {
-                        score += 0;
-                    }
-                    else
-                    {
-                        if ( board[x+1][y] == enemy && ( board[x-1][y] == self || board[x-1][y] == 3 ) )
-                        {
-                            score += 0;
-                        }
-                        else
-                        {
-                            if ( step == 2 && m_dead_four_plus == 1 )
-                            {
-                                score += score_4; //90
-                            }
-                            else
-                            {
-                                score += score_5;
-                                if ( step == 1 )
-                                {
-                                    add_new_pos_for_two(x,y);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } 
-  
-    }
-    //堵三
-    if ( connectCount == 3 )
-    {
-        if ( middleCheck[0] && middleCheck[1] )
-        { 
-            if ( defVT == T )
-            {        
                 if ( step == 2 && m_dead_four_plus == 1 )
                 {
-                    score += score_3_3; // 200
+                    score += score_4_7; //90
                 }
                 else
                 {
-                    score += score_4;
+                    score += score_5;
                     if ( step == 1 )
                     {
                         add_new_pos_for_two(x,y);
                     }
                 }
             }
-            else
+            if ( board[x+1][y] == 0 && board[x+2][y] == enemy && board[x+3][y] == 0 && board[x+4][y] == 0 && board[x+5][y] == enemy && board[x+6][y] == 0 && board[x+7][y] == 0 )
             {
                 if ( step == 2 && m_dead_four_plus == 1 )
                 {
-                    score += score_4_6; //137
+                    score += score_4_7; //90
                 }
                 else
                 {
-                    score += score_5_5;
+                    score += score_5;
                     if ( step == 1 )
                     {
                         add_new_pos_for_two(x,y);
@@ -1018,105 +884,248 @@ int CMoveGenerator::set_by_direction1 ( char color , int x , int y , int step, c
             }
         }
 
-        if ( middleCheck[0] && !middleCheck[1] && ( board[x-1][y] == enemy || board[x-2][y] == enemy ) )
-        { 
-            if ( defVT == T )
-            {        
-                if ( step == 2 && m_dead_four_plus == 1 )
-                {
-                    score += score_3_3; // 145
-                }
-                else
-                {
-                    score += score_4;
-                    if ( step == 1 )
-                    {
-                        add_new_pos_for_two(x,y);
-                    }
-                }
-            }
-            else
+        // Block the two stones.
+        if ( connectCount == 2 )
+        {
+            if ( middleCheck[0] && middleCheck[1] && board[highLevel][y] == 0 && board[lowLevel][y] == 0 && Ocount <= 2 )
             {
                 if ( step == 2 && m_dead_four_plus == 1 )
                 {
-                    score += score_4_6; //80
+                    score += score_4; //90
                 }
                 else
                 {
-                    score += score_5_5;
+                    score += score_5;
                     if ( step == 1 )
                     {
                         add_new_pos_for_two(x,y);
                     }
                 }
             }
-        }
+            if ( middleCheck[0] && !middleCheck[1] && board[highLevel][y] == 0 )
+            {
+                if ( board[x-1][y] == 0 && board[x-2][y] == 0 )
+                {
+                    score += 0;
+                }
+                else
+                {
+                    if ( board[x-1][y] == enemy && board[x-2][y] == 0 && board[x-3][y] == 0 && board[x-4][y] == enemy && board[x-5][y] == 0 && ( board[x-6][y] == self || board[x-6][y] == 3 ) )
+                    {
+                        score += 0;
+                    }
+                    else
+                    {
+                        if ( board[x-1][y] == 0 && board[x-2][y] == enemy && board[x-3][y] == 0 && board[x-4][y] == enemy && board[x-5][y] == 0 && ( board[x-6][y] == self || board[x-6][y] == 3 ) )
+                        {
+                            score += 0;
+                        }
+                        else
+                        {
+                            if ( board[x-1][y] == enemy && ( board[x+1][y] == self || board[x+1][y] == 3 ) )
+                            {
+                                score += 0;
+                            }
+                            else
+                            {
+                                if ( step == 2 && m_dead_four_plus == 1 )
+                                {
+                                    score += score_4; //90
+                                }
+                                else
+                                {
+                                    score += score_5;
+                                    if ( step == 1 )
+                                    {
+                                        add_new_pos_for_two(x,y);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if ( middleCheck[1] && !middleCheck[0] && board[lowLevel][y] == 0 )
+            {
+                if ( board[x+1][y] == 0 && board[x+2][y] == 0 )
+                {
+                    score += 0;
+                }
+                else
+                {
+                    if ( board[x+1][y] == enemy && board[x+2][y] == 0 && board[x+3][y] == 0 && board[x+4][y] == enemy && board[x+5][y] == 0 && ( board[x+6][y] == self || board[x+6][y] == 3 ) )
+                    {
+                        score += 0;
+                    }
+                    else
+                    {
+                        if ( board[x+1][y] == 0 && board[x+2][y] == enemy && board[x+3][y] == 0 && board[x+4][y] == enemy && board[x+5][y] == 0 && ( board[x+6][y] == self || board[x+6][y] == 3 ) )
+                        {
+                            score += 0;
+                        }
+                        else
+                        {
+                            if ( board[x+1][y] == enemy && ( board[x-1][y] == self || board[x-1][y] == 3 ) )
+                            {
+                                score += 0;
+                            }
+                            else
+                            {
+                                if ( step == 2 && m_dead_four_plus == 1 )
+                                {
+                                    score += score_4; //90
+                                }
+                                else
+                                {
+                                    score += score_5;
+                                    if ( step == 1 )
+                                    {
+                                        add_new_pos_for_two(x,y);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
-        if ( !middleCheck[0] && middleCheck[1] && ( board[x+1][y] == enemy || board[x+2][y] == enemy ) )
-        { 
-            if ( defVT == T )
-            {        
-                if ( step == 2 && m_dead_four_plus == 1 )
-                {
-                    score += score_3_3; // 145
-                }
-                else
-                {
-                    score += score_4;
-                    if ( step == 1 )
-                    {
-                        add_new_pos_for_two(x,y);
-                    }
-                }
-            }
-            else
-            {
-                if ( step == 2 && m_dead_four_plus == 1 )
-                {
-                    score += score_4_6; //80
-                }
-                else
-                {
-                    score += score_5_5;
-                    if ( step == 1 )
-                    {
-                        add_new_pos_for_two(x,y);
-                    }
-                }
-            }
         }
-        
-    }
-    // 堵五
-    if ( connectCount == 5 )
-    {
-        score += score_2;
-    }
-    // 防冲七
-    if ( connectCount == 6 )
-    {
-        score += score_2;
-    }
-    // 防冲八
-    if ( connectCount == 7 )
-    {
-        score += score_2;
-    }
-    // 防冲九
-    if ( connectCount == 8 )
-    {
-        score += score_2;
-    }
-    // 防冲十
-    if ( connectCount == 9 )
-    {
-        score += score_2;
-    }
-    // 防冲十一
-    if ( connectCount == 10 )
-    {
-        score += score_2;
-    }
+        // Block the three stones.
+        if ( connectCount == 3 )
+        {
+            if ( middleCheck[0] && middleCheck[1] )
+            {
+                if ( defVT == T )
+                {
+                    if ( step == 2 && m_dead_four_plus == 1 )
+                    {
+                        score += score_3_3; // 200
+                    }
+                    else
+                    {
+                        score += score_4;
+                        if ( step == 1 )
+                        {
+                            add_new_pos_for_two(x,y);
+                        }
+                    }
+                }
+                else
+                {
+                    if ( step == 2 && m_dead_four_plus == 1 )
+                    {
+                        score += score_4_6; //137
+                    }
+                    else
+                    {
+                        score += score_5_5;
+                        if ( step == 1 )
+                        {
+                            add_new_pos_for_two(x,y);
+                        }
+                    }
+                }
+            }
+
+            if ( middleCheck[0] && !middleCheck[1] && ( board[x-1][y] == enemy || board[x-2][y] == enemy ) )
+            {
+                if ( defVT == T )
+                {
+                    if ( step == 2 && m_dead_four_plus == 1 )
+                    {
+                        score += score_3_3; // 145
+                    }
+                    else
+                    {
+                        score += score_4;
+                        if ( step == 1 )
+                        {
+                            add_new_pos_for_two(x,y);
+                        }
+                    }
+                }
+                else
+                {
+                    if ( step == 2 && m_dead_four_plus == 1 )
+                    {
+                        score += score_4_6; //80
+                    }
+                    else
+                    {
+                        score += score_5_5;
+                        if ( step == 1 )
+                        {
+                            add_new_pos_for_two(x,y);
+                        }
+                    }
+                }
+            }
+
+            if ( !middleCheck[0] && middleCheck[1] && ( board[x+1][y] == enemy || board[x+2][y] == enemy ) )
+            {
+                if ( defVT == T )
+                {
+                    if ( step == 2 && m_dead_four_plus == 1 )
+                    {
+                        score += score_3_3; // 145
+                    }
+                    else
+                    {
+                        score += score_4;
+                        if ( step == 1 )
+                        {
+                            add_new_pos_for_two(x,y);
+                        }
+                    }
+                }
+                else
+                {
+                    if ( step == 2 && m_dead_four_plus == 1 )
+                    {
+                        score += score_4_6; //80
+                    }
+                    else
+                    {
+                        score += score_5_5;
+                        if ( step == 1 )
+                        {
+                            add_new_pos_for_two(x,y);
+                        }
+                    }
+                }
+            }
+
+        }
+        // Block five stones.
+        if ( connectCount == 5 )
+        {
+            score += score_2;
+        }
+        // Block six.
+        if ( connectCount == 6 )
+        {
+            score += score_2;
+        }
+        // Block seven.
+        if ( connectCount == 7 )
+        {
+            score += score_2;
+        }
+        // Block eight.
+        if ( connectCount == 8 )
+        {
+            score += score_2;
+        }
+        // Block nine.
+        if ( connectCount == 9 )
+        {
+            score += score_2;
+        }
+        // Block ten.
+        if ( connectCount == 10 )
+        {
+            score += score_2;
+        }
     }
     else
     {
@@ -1124,7 +1133,7 @@ int CMoveGenerator::set_by_direction1 ( char color , int x , int y , int step, c
     }
 
 
-    //寻找进攻的上下界
+    // Set the bounds of attack.
     connectCount = 0;
     Ocount = 0;
     highLevel = x;
@@ -1214,7 +1223,7 @@ int CMoveGenerator::set_by_direction1 ( char color , int x , int y , int step, c
 
                     break;
                 }
-                        
+
                 if ( board[i-1][y] == 0 && board[i-2][y] == 0 )
                 {
                     highLevel = i;
@@ -1246,7 +1255,7 @@ int CMoveGenerator::set_by_direction1 ( char color , int x , int y , int step, c
     {
         highLevel = x-2;
     }
-    
+
     i = x;
     while ( 1 )
     {
@@ -1265,7 +1274,7 @@ int CMoveGenerator::set_by_direction1 ( char color , int x , int y , int step, c
             {
                 if ( !IsValidPos(i+1,y) )
                 {
-                    edgeBlock = 1;  //被边界阻挡
+                    edgeBlock = 1;  // Blocked by the edges.
                     canGoFive = 1;
                     sixDecreaseO_2 = 1;
 
@@ -1274,10 +1283,10 @@ int CMoveGenerator::set_by_direction1 ( char color , int x , int y , int step, c
                 {
                     if ( !IsValidPos(i+2,y) )
                     {
-                        edgeBlock = 1;  //被边界阻挡
+                        edgeBlock = 1;  // Blocked by the edges.
                         canGoFive = 1;
                         lowLevel = i;
-                         if ( i == x )
+                        if ( i == x )
                         {
                             if ( board[i+1][y] == 0 )
                             {
@@ -1305,7 +1314,7 @@ int CMoveGenerator::set_by_direction1 ( char color , int x , int y , int step, c
                                 connectCount ++;
                                 Ocount ++;
                             }
-                         }
+                        }
                         break;
                     }
                 }
@@ -1363,30 +1372,29 @@ int CMoveGenerator::set_by_direction1 ( char color , int x , int y , int step, c
     }
     sixDecreaseO = sixDecreaseO_1 + sixDecreaseO_2;
 
-    //确定是连几，寻找进攻加分
-    //冲二
+    // Add scores for connected stones.
     if ( connectCount == 1 && board[lowLevel][y] == 0 && board[highLevel][y] == 0 )
     {
         if ( Ocount == 0 )
         {
-            score += score_6;           // 活二
+            score += score_6;           // Connect for two.
         }
-        else 
+        else
         {
             if ( Ocount == 1 )
             {
-                score += score_6_5;      //跳二
+                score += score_6_5;
             }
             else
             {
                 if ( Ocount == 2)
                 {
-                    score += score_6_6; //跳二
+                    score += score_6_6;
                 }
             }
         }
     }
-    //冲三
+    // For make three connection.
     if ( connectCount == 2 )
     {
         if ( board[highLevel][y] == 0 && board[lowLevel][y] == 0 )
@@ -1420,7 +1428,7 @@ int CMoveGenerator::set_by_direction1 ( char color , int x , int y , int step, c
                 if ( step == 1 )
                 {
                     score += score_3;
-                    
+
                     add_new_pos_for_two(x,y);
                 }
                 else
@@ -1434,7 +1442,7 @@ int CMoveGenerator::set_by_direction1 ( char color , int x , int y , int step, c
             }
         }
     }
-    //冲四
+    // To make four.
     if ( connectCount == 3 )
     {
         if ( board[lowLevel][y] == 0 && board[highLevel][y] == 0 )
@@ -1444,7 +1452,7 @@ int CMoveGenerator::set_by_direction1 ( char color , int x , int y , int step, c
                 if ( step == 1 )
                 {
                     score += score_2_9;
-                    
+
                     add_new_pos_for_two(x,y);
                 }
                 else
@@ -1474,22 +1482,21 @@ int CMoveGenerator::set_by_direction1 ( char color , int x , int y , int step, c
     }
     if ( connectCount >= 4 )
     {
-    //冲五
+        // To make five.
         if ( step == 1 )
         {
-            //在OOOO中冲五
+            // OOOO to make five.
             if ( board[x-1][y] == self && board[x-2][y] == self && board[x-3][y] == self && board[x-4][y] == self && ( board[x-5][y] == 0 || board[x+1][y] == 0 ) )
             {
                 score += score_1;
                 add_new_pos_for_two(x,y);
             }
-            //在OOOO中冲五
             if ( board[x+1][y] == self && board[x+2][y] == self && board[x+3][y] == self && board[x+4][y] == self && ( board[x+5][y] == 0 || board[x-1][y] == 0 ) )
             {
                 score += score_1;
                 add_new_pos_for_two(x,y);
             }
-            //在OXOOO中冲五
+            // OXOOO to make five.
             if ( board[x-1][y] == self && board[x-2][y] == 0 && board[x-3][y] == self && board[x-4][y] == self && board[x-5][y] == self )
             {
                 score += score_1;
@@ -1520,7 +1527,7 @@ int CMoveGenerator::set_by_direction1 ( char color , int x , int y , int step, c
                 score += score_1;
                 add_new_pos_for_two(x,y);
             }
-            //在OOXOO中冲五
+            // OOXOO
             if ( board[x-1][y] == self && board[x-2][y] == self && board[x-3][y] == 0 && board[x-4][y] == self && board[x-5][y] == self )
             {
                 score += score_1;
@@ -1536,8 +1543,8 @@ int CMoveGenerator::set_by_direction1 ( char color , int x , int y , int step, c
                 score += score_1;
                 add_new_pos_for_two(x,y);
             }
-            
-            //在OXXOOO中冲五
+
+            // OXXOOO
             if ( board[x-1][y] == self && board[x+1][y] == 0 && board[x+2][y] == self && board[x+3][y] == self && board[x+4][y] == self )
             {
                 score += score_1;
@@ -1558,7 +1565,7 @@ int CMoveGenerator::set_by_direction1 ( char color , int x , int y , int step, c
                 score += score_1;
                 add_new_pos_for_two(x,y);
             }
-            //在OOXXOO中冲五
+            // OOXXOO
             if ( board[x-1][y] == self && board[x-2][y] == self && board[x+1][y] == 0 && board[x+2][y] == self && board[x+3][y] == self )
             {
                 score += score_1;
@@ -1569,7 +1576,7 @@ int CMoveGenerator::set_by_direction1 ( char color , int x , int y , int step, c
                 score += score_1;
                 add_new_pos_for_two(x,y);
             }
-            //在OXOXOO中冲五
+            // OXOXOO
             if ( board[x-1][y] == self && board[x+1][y] == self && board[x+2][y] == 0 && board[x+3][y] == self && board[x+4][y] == self )
             {
                 score += score_1;
@@ -1590,7 +1597,7 @@ int CMoveGenerator::set_by_direction1 ( char color , int x , int y , int step, c
                 score += score_1;
                 add_new_pos_for_two(x,y);
             }
-            //在OXOOXO中冲五
+            // OXOOXO
             if ( board[x-1][y] == self && board[x+1][y] == self && board[x+2][y] == self && board[x+3][y] == 0 && board[x+4][y] == self )
             {
                 score += score_1;
@@ -1621,7 +1628,7 @@ int CMoveGenerator::set_by_direction1 ( char color , int x , int y , int step, c
             }
         }
 
-        //在OOOOO中冲六
+        // OOOOO
         if ( board[x-1][y] == self && board[x-2][y] == self && board[x-3][y] == self && board[x-4][y] == self && board[x-5][y] == self )
         {
             score += score_1;
@@ -1630,7 +1637,7 @@ int CMoveGenerator::set_by_direction1 ( char color , int x , int y , int step, c
         {
             score += score_1;
         }
-        //在OXOOOO中冲六
+        // OXOOOO
         if ( board[x-1][y] == self && board[x+1][y] == self && board[x+2][y] == self && board[x+3][y] == self && board[x+4][y] == self )
         {
             score += score_1;
@@ -1639,7 +1646,7 @@ int CMoveGenerator::set_by_direction1 ( char color , int x , int y , int step, c
         {
             score += score_1;
         }
-        //在OOXOOO中冲六
+        // OOXOOO
         if ( board[x-1][y] == self && board[x-2][y] == self && board[x+1][y] == self && board[x+2][y] == self && board[x+3][y] == self )
         {
             score += score_1;
@@ -1652,23 +1659,22 @@ int CMoveGenerator::set_by_direction1 ( char color , int x , int y , int step, c
     return score;
 }
 
-//斜方向（2向）计算分数
+// Set score by left up direction.
 int CMoveGenerator::set_by_direction2 ( char color , int x , int y , int step, char board[][GRID_NUM] )
 {
-     //确定自己和对手的棋子颜色
-    int self , enemy , highLevelx , lowLevelx , highLevely , lowLevely , i , j , connectCountUp = 0 , connectCountDn = 0 , OcountUp = 0 , OcountDn = 0 , score = 0 , middleCheck[2] = {0,0} , connectCount = 0 , defSuc = 0 , defVT = 0 , canGoFive = 0 , edgeBlock = 0 , Ocount = 0; 
+    int self , enemy , highLevelx , lowLevelx , highLevely , lowLevely , i , j , connectCountUp = 0 , connectCountDn = 0 , OcountUp = 0 , OcountDn = 0 , score = 0 , middleCheck[2] = {0,0} , connectCount = 0 , defSuc = 0 , defVT = 0 , canGoFive = 0 , edgeBlock = 0 , Ocount = 0;
 
     if ( color == 1 )
     {
         self = 1;
-        enemy = 2; 
+        enemy = 2;
     }
-    else 
+    else
     {
         self = 2;
         enemy = 1;
     }
-   
+
     OcountUp = 0;
     OcountDn = 0;
     connectCountUp = 0;
@@ -1679,7 +1685,6 @@ int CMoveGenerator::set_by_direction2 ( char color , int x , int y , int step, c
     lowLevelx = x;
     lowLevely = y;
 
-     //寻找防守的上下界
     i = x;
     j = y;
     while ( OcountUp < 3 )
@@ -1725,7 +1730,6 @@ int CMoveGenerator::set_by_direction2 ( char color , int x , int y , int step, c
         highLevely = j;
         OcountUp = 2;
     }
-   //寻找防守的下界
     i = x;
     j = y;
     while ( OcountDn < 3 )
@@ -1772,7 +1776,7 @@ int CMoveGenerator::set_by_direction2 ( char color , int x , int y , int step, c
         OcountDn = 2;
     }
     if ( middleCheck[0] && middleCheck[1] )
-    {        
+    {
         if ( lowLevelx - x <= 6 || x - highLevelx <= 6 )
         {
             defSuc = 1;
@@ -1867,327 +1871,315 @@ int CMoveGenerator::set_by_direction2 ( char color , int x , int y , int step, c
     }
     if ( defSuc )
     {
-    if ( connectCount == 1 )
-    {
-        score += score_9;
-    }    
-    // 堵四
-    if ( connectCount == 4 )
-    {
-        if ( middleCheck[0] && middleCheck[1] )
+        if ( connectCount == 1 )
         {
-            score += score_2;
-            if ( step == 1 )
-            {
-                if ( Ocount <= 2 )
-                {
-                    m_dead_four_plus = 1;
-                }
-                add_new_pos_for_two(x,y);
-            }
+            score += score_9;
         }
-        else
+        if ( connectCount == 4 )
         {
-            if ( step == 2 )
-            {
-                if ( defVT == V )
-                {
-                    score += score_2;
-                }
-            }
-            else
+            if ( middleCheck[0] && middleCheck[1] )
             {
                 score += score_2;
-                if ( defVT == V )
+                if ( step == 1 )
                 {
-                    m_dead_four_plus = 1;
+                    if ( Ocount <= 2 )
+                    {
+                        m_dead_four_plus = 1;
+                    }
+                    add_new_pos_for_two(x,y);
                 }
-                add_new_pos_for_two(x,y);
-            }
-        }
-    }
-    if ( connectCount == 1 )
-    {
-        if ( board[x-1][y+1] == 0 && board[x-2][y+2] == enemy && board[x-3][y+3] == 0 && board[x-4][y+4] == 0 && board[x-5][y+5] == enemy && board[x-6][y+6] == 0 && board[x-7][y+7] == 0 )
-        {
-            if ( step == 2 && m_dead_four_plus == 1 )
-            {
-                score += score_4_7; //90
             }
             else
             {
-                score += score_5;
-                if ( step == 1 )
+                if ( step == 2 )
                 {
+                    if ( defVT == V )
+                    {
+                        score += score_2;
+                    }
+                }
+                else
+                {
+                    score += score_2;
+                    if ( defVT == V )
+                    {
+                        m_dead_four_plus = 1;
+                    }
                     add_new_pos_for_two(x,y);
                 }
             }
         }
-        if ( board[x+1][y-1] == 0 && board[x+2][y-2] == enemy && board[x+3][y-3] == 0 && board[x+4][y-4] == 0 && board[x+5][y-5] == enemy && board[x+6][y-6] == 0 && board[x+7][y-7] == 0 )
+        if ( connectCount == 1 )
         {
-            if ( step == 2 && m_dead_four_plus == 1 )
+            if ( board[x-1][y+1] == 0 && board[x-2][y+2] == enemy && board[x-3][y+3] == 0 && board[x-4][y+4] == 0 && board[x-5][y+5] == enemy && board[x-6][y+6] == 0 && board[x-7][y+7] == 0 )
             {
-                score += score_4_7; //90
-            }
-            else
-            {
-                score += score_5;
-                if ( step == 1 )
+                if ( step == 2 && m_dead_four_plus == 1 )
                 {
-                    add_new_pos_for_two(x,y);
+                    score += score_4_7; //90
+                }
+                else
+                {
+                    score += score_5;
+                    if ( step == 1 )
+                    {
+                        add_new_pos_for_two(x,y);
+                    }
+                }
+            }
+            if ( board[x+1][y-1] == 0 && board[x+2][y-2] == enemy && board[x+3][y-3] == 0 && board[x+4][y-4] == 0 && board[x+5][y-5] == enemy && board[x+6][y-6] == 0 && board[x+7][y-7] == 0 )
+            {
+                if ( step == 2 && m_dead_four_plus == 1 )
+                {
+                    score += score_4_7; //90
+                }
+                else
+                {
+                    score += score_5;
+                    if ( step == 1 )
+                    {
+                        add_new_pos_for_two(x,y);
+                    }
                 }
             }
         }
-    }
-    //堵二
-    if ( connectCount == 2 )
-    {
-        if ( middleCheck[0] && middleCheck[1] && board[highLevelx][highLevely] == 0 && board[lowLevelx][lowLevely] == 0 && Ocount <= 2 )
+        if ( connectCount == 2 )
         {
-            if ( step == 2 && m_dead_four_plus == 1 )
+            if ( middleCheck[0] && middleCheck[1] && board[highLevelx][highLevely] == 0 && board[lowLevelx][lowLevely] == 0 && Ocount <= 2 )
             {
-                score += score_4; //90
-            }
-            else
-            {
-                score += score_5;
-                if ( step == 1 )
+                if ( step == 2 && m_dead_four_plus == 1 )
                 {
-                    add_new_pos_for_two(x,y);
+                }
+                else
+                {
+                    score += score_5;
+                    if ( step == 1 )
+                    {
+                        add_new_pos_for_two(x,y);
+                    }
                 }
             }
-        }
-        if ( middleCheck[0] && !middleCheck[1] && board[highLevelx][highLevely] == 0 )
-        {
-            if ( board[x-1][y+1] == 0 && board[x-2][y+2] == 0 )
+            if ( middleCheck[0] && !middleCheck[1] && board[highLevelx][highLevely] == 0 )
             {
-                score += 0;
-            }
-            else
-            {
-                if ( board[x-1][y+1] == enemy && board[x-2][y+2] == 0 && board[x-3][y+3] == 0 && board[x-4][y+4] == enemy && board[x-5][y+5] == 0 && ( board[x-6][y+6] == self || board[x-6][y+6] == 3 ) )
+                if ( board[x-1][y+1] == 0 && board[x-2][y+2] == 0 )
                 {
                     score += 0;
                 }
                 else
                 {
-                    if ( board[x-1][y+1] == 0 && board[x-2][y+2] == enemy && board[x-3][y+3] == 0 && board[x-4][y+4] == enemy && board[x-5][y+5] == 0 && ( board[x-6][y+6] == self || board[x-6][y+6] == 3 ) )
+                    if ( board[x-1][y+1] == enemy && board[x-2][y+2] == 0 && board[x-3][y+3] == 0 && board[x-4][y+4] == enemy && board[x-5][y+5] == 0 && ( board[x-6][y+6] == self || board[x-6][y+6] == 3 ) )
                     {
                         score += 0;
                     }
                     else
                     {
-                        if ( board[x-1][y+1] == enemy && ( board[x+1][y-1] == self || board[x+1][y-1] == 3 ) )
+                        if ( board[x-1][y+1] == 0 && board[x-2][y+2] == enemy && board[x-3][y+3] == 0 && board[x-4][y+4] == enemy && board[x-5][y+5] == 0 && ( board[x-6][y+6] == self || board[x-6][y+6] == 3 ) )
                         {
                             score += 0;
                         }
                         else
                         {
-                            if ( step == 2 && m_dead_four_plus == 1 )
+                            if ( board[x-1][y+1] == enemy && ( board[x+1][y-1] == self || board[x+1][y-1] == 3 ) )
                             {
-                                score += score_4; //90
+                                score += 0;
                             }
                             else
                             {
-                                score += score_5;
-                                if ( step == 1 )
+                                if ( step == 2 && m_dead_four_plus == 1 )
                                 {
-                                    add_new_pos_for_two(x,y);
+                                    score += score_4; //90
+                                }
+                                else
+                                {
+                                    score += score_5;
+                                    if ( step == 1 )
+                                    {
+                                        add_new_pos_for_two(x,y);
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-        }
-        if ( middleCheck[1] && !middleCheck[0] && board[lowLevelx][lowLevely] == 0 )
-        {
-            if ( board[x+1][y-1] == 0 && board[x+2][y-2] == 0 )
+            if ( middleCheck[1] && !middleCheck[0] && board[lowLevelx][lowLevely] == 0 )
             {
-                score += 0;
-            }
-            else
-            {
-                if ( board[x+1][y-1] == enemy && board[x+2][y-2] == 0 && board[x+3][y-3] == 0 && board[x+4][y-4] == enemy && board[x+5][y-5] == 0 && ( board[x+6][y-6] == self || board[x+6][y-6] == 3 ) )
+                if ( board[x+1][y-1] == 0 && board[x+2][y-2] == 0 )
                 {
                     score += 0;
                 }
                 else
                 {
-                    if ( board[x+1][y-1] == 0 && board[x+2][y-2] == enemy && board[x+3][y-3] == 0 && board[x+4][y-4] == enemy && board[x+5][y-5] == 0 && ( board[x+6][y-6] == self || board[x+6][y-6] == 3 ) )
+                    if ( board[x+1][y-1] == enemy && board[x+2][y-2] == 0 && board[x+3][y-3] == 0 && board[x+4][y-4] == enemy && board[x+5][y-5] == 0 && ( board[x+6][y-6] == self || board[x+6][y-6] == 3 ) )
                     {
                         score += 0;
                     }
                     else
                     {
-                        if ( board[x+1][y-1] == enemy && ( board[x-1][y+1] == self || board[x-1][y+1] == 3 ) )
+                        if ( board[x+1][y-1] == 0 && board[x+2][y-2] == enemy && board[x+3][y-3] == 0 && board[x+4][y-4] == enemy && board[x+5][y-5] == 0 && ( board[x+6][y-6] == self || board[x+6][y-6] == 3 ) )
                         {
                             score += 0;
                         }
                         else
                         {
-                            if ( step == 2 && m_dead_four_plus == 1 )
+                            if ( board[x+1][y-1] == enemy && ( board[x-1][y+1] == self || board[x-1][y+1] == 3 ) )
                             {
-                                score += score_4; //90
+                                score += 0;
                             }
                             else
                             {
-                                score += score_5;
-                                if ( step == 1 )
+                                if ( step == 2 && m_dead_four_plus == 1 )
                                 {
-                                    add_new_pos_for_two(x,y);
+                                }
+                                else
+                                {
+                                    score += score_5;
+                                    if ( step == 1 )
+                                    {
+                                        add_new_pos_for_two(x,y);
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-        } 
-  
-    }
-    //堵三
-    if ( connectCount == 3 )
-    {
-        if ( middleCheck[0] && middleCheck[1] )
-        { 
-            if ( defVT == T )
-            {        
-                if ( step == 2 && m_dead_four_plus == 1 )
-                {
-                    score += score_3_3; // 200
-                }
-                else
-                {
-                    score += score_4;
-                    if ( step == 1 )
-                    {
-                        add_new_pos_for_two(x,y);
-                    }
-                }
-            }
-            else
-            {
-                if ( step == 2 && m_dead_four_plus == 1 )
-                {
-                    score += score_4_6; //137
-                }
-                else
-                {
-                    score += score_5_5;
-                    if ( step == 1 )
-                    {
-                        add_new_pos_for_two(x,y);
-                    }
-                }
-            }
-        }
 
-        if ( middleCheck[0] && !middleCheck[1] && ( board[x-1][y+1] == enemy || board[x-2][y+2] == enemy ) )
-        { 
-            if ( defVT == T )
-            {        
-                if ( step == 2 && m_dead_four_plus == 1 )
-                {
-                    score += score_3_3; // 145
-                }
-                else
-                {
-                    score += score_4;
-                    if ( step == 1 )
-                    {
-                        add_new_pos_for_two(x,y);
-                    }
-                }
-            }
-            else
-            {
-                if ( step == 2 && m_dead_four_plus == 1 )
-                {
-                    score += score_4_6; //80
-                }
-                else
-                {
-                    score += score_5_5;
-                    if ( step == 1 )
-                    {
-                        add_new_pos_for_two(x,y);
-                    }
-                }
-            }
         }
+        if ( connectCount == 3 )
+        {
+            if ( middleCheck[0] && middleCheck[1] )
+            {
+                if ( defVT == T )
+                {
+                    if ( step == 2 && m_dead_four_plus == 1 )
+                    {
+                        score += score_3_3; // 200
+                    }
+                    else
+                    {
+                        score += score_4;
+                        if ( step == 1 )
+                        {
+                            add_new_pos_for_two(x,y);
+                        }
+                    }
+                }
+                else
+                {
+                    if ( step == 2 && m_dead_four_plus == 1 )
+                    {
+                        score += score_4_6; //137
+                    }
+                    else
+                    {
+                        score += score_5_5;
+                        if ( step == 1 )
+                        {
+                            add_new_pos_for_two(x,y);
+                        }
+                    }
+                }
+            }
 
-        if ( !middleCheck[0] && middleCheck[1] && ( board[x+1][y-1] == enemy || board[x+2][y-2] == enemy ) )
-        { 
-            if ( defVT == T )
-            {        
-                if ( step == 2 && m_dead_four_plus == 1 )
-                {
-                    score += score_3_3; // 145
-                }
-                else
-                {
-                    score += score_4;
-                    if ( step == 1 )
-                    {
-                        add_new_pos_for_two(x,y);
-                    }
-                }
-            }
-            else
+            if ( middleCheck[0] && !middleCheck[1] && ( board[x-1][y+1] == enemy || board[x-2][y+2] == enemy ) )
             {
-                if ( step == 2 && m_dead_four_plus == 1 )
+                if ( defVT == T )
                 {
-                    score += score_4_6; //80
+                    if ( step == 2 && m_dead_four_plus == 1 )
+                    {
+                        score += score_3_3; // 145
+                    }
+                    else
+                    {
+                        score += score_4;
+                        if ( step == 1 )
+                        {
+                            add_new_pos_for_two(x,y);
+                        }
+                    }
                 }
                 else
                 {
-                    score += score_5_5;
-                    if ( step == 1 )
+                    if ( step == 2 && m_dead_four_plus == 1 )
                     {
-                        add_new_pos_for_two(x,y);
+                        score += score_4_6; //80
+                    }
+                    else
+                    {
+                        score += score_5_5;
+                        if ( step == 1 )
+                        {
+                            add_new_pos_for_two(x,y);
+                        }
                     }
                 }
             }
+
+            if ( !middleCheck[0] && middleCheck[1] && ( board[x+1][y-1] == enemy || board[x+2][y-2] == enemy ) )
+            {
+                if ( defVT == T )
+                {
+                    if ( step == 2 && m_dead_four_plus == 1 )
+                    {
+                        score += score_3_3; // 145
+                    }
+                    else
+                    {
+                        score += score_4;
+                        if ( step == 1 )
+                        {
+                            add_new_pos_for_two(x,y);
+                        }
+                    }
+                }
+                else
+                {
+                    if ( step == 2 && m_dead_four_plus == 1 )
+                    {
+                        score += score_4_6; //80
+                    }
+                    else
+                    {
+                        score += score_5_5;
+                        if ( step == 1 )
+                        {
+                            add_new_pos_for_two(x,y);
+                        }
+                    }
+                }
+            }
+
         }
-        
-    }
-    // 堵五
-    if ( connectCount == 5 )
-    {
-        score += score_2;
-    }
-    // 防冲七
-    if ( connectCount == 6 )
-    {
-        score += score_2;
-    }
-    // 防冲八
-    if ( connectCount == 7 )
-    {
-        score += score_2;
-    }
-    // 防冲九
-    if ( connectCount == 8 )
-    {
-        score += score_2;
-    }
-    // 防冲十
-    if ( connectCount == 9 )
-    {
-        score += score_2;
-    }
-    // 防冲十一
-    if ( connectCount == 10 )
-    {
-        score += score_2;
-    }
+        if ( connectCount == 5 )
+        {
+            score += score_2;
+        }
+        if ( connectCount == 6 )
+        {
+            score += score_2;
+        }
+        if ( connectCount == 7 )
+        {
+            score += score_2;
+        }
+        if ( connectCount == 8 )
+        {
+            score += score_2;
+        }
+        if ( connectCount == 9 )
+        {
+            score += score_2;
+        }
+        if ( connectCount == 10 )
+        {
+            score += score_2;
+        }
     }
     else
     {
         score = 0;
     }
 
-    //寻找进攻的上下界
     i = x;
     j = y;
     highLevelx = x;
@@ -2227,7 +2219,7 @@ int CMoveGenerator::set_by_direction2 ( char color , int x , int y , int step, c
                         canGoFive = 1;
                         highLevelx = i;
                         highLevely = j;
-                         if ( i == x )
+                        if ( i == x )
                         {
                             if ( board[i-1][j+1] == 0 )
                             {
@@ -2257,7 +2249,7 @@ int CMoveGenerator::set_by_direction2 ( char color , int x , int y , int step, c
                                 connectCount ++;
                                 Ocount ++;
                             }
-                         }
+                        }
                         break;
                     }
                 }
@@ -2352,7 +2344,7 @@ int CMoveGenerator::set_by_direction2 ( char color , int x , int y , int step, c
                         canGoFive = 1;
                         lowLevelx = i;
                         lowLevely = j;
-                         if ( i == x )
+                        if ( i == x )
                         {
                             if ( board[i+1][y-1] == 0 )
                             {
@@ -2382,7 +2374,7 @@ int CMoveGenerator::set_by_direction2 ( char color , int x , int y , int step, c
                                 connectCount ++;
                                 Ocount ++;
                             }
-                         }
+                        }
                         break;
                     }
                 }
@@ -2445,30 +2437,27 @@ int CMoveGenerator::set_by_direction2 ( char color , int x , int y , int step, c
         lowLevely = y-2;
     }
     sixDecreaseO = sixDecreaseO_1 + sixDecreaseO_2;
-    //确定是连几，寻找进攻加分
-    //冲二
     if ( connectCount == 1 && board[lowLevelx][lowLevely] == 0 && board[highLevelx][highLevely] == 0 )
     {
         if ( Ocount == 0 )
         {
-            score += score_6;           // 活二
+            score += score_6;           //
         }
-        else 
+        else
         {
             if ( Ocount == 1 )
             {
-                score += score_6_5;      //跳二
+                score += score_6_5;      //
             }
             else
             {
                 if ( Ocount == 2)
                 {
-                    score += score_6_6; //跳二
+                    score += score_6_6; //
                 }
             }
         }
     }
-    //冲三
     if ( connectCount == 2 )
     {
         if ( board[highLevelx][highLevely] == 0 && board[lowLevelx][lowLevely] == 0 )
@@ -2478,7 +2467,7 @@ int CMoveGenerator::set_by_direction2 ( char color , int x , int y , int step, c
                 if ( step == 1 )
                 {
                     score += score_3;
-                    
+
                     add_new_pos_for_two(x,y);
                 }
                 else
@@ -2502,7 +2491,7 @@ int CMoveGenerator::set_by_direction2 ( char color , int x , int y , int step, c
                 if ( step == 1 )
                 {
                     score += score_3;
-                    
+
                     add_new_pos_for_two(x,y);
                 }
                 else
@@ -2516,7 +2505,6 @@ int CMoveGenerator::set_by_direction2 ( char color , int x , int y , int step, c
             }
         }
     }
-    //冲四
     if ( connectCount == 3 )
     {
         if ( board[lowLevelx][lowLevely] == 0 && board[highLevelx][highLevely] == 0 )
@@ -2526,7 +2514,7 @@ int CMoveGenerator::set_by_direction2 ( char color , int x , int y , int step, c
                 if ( step == 1 )
                 {
                     score += score_2_9;
-                    
+
                     add_new_pos_for_two(x,y);
                 }
                 else
@@ -2554,24 +2542,20 @@ int CMoveGenerator::set_by_direction2 ( char color , int x , int y , int step, c
             }
         }
     }
-    //冲五
     if ( connectCount >= 4 )
     {
         if ( step == 1 )
         {
-            //在OOOO中冲五
             if ( board[x-1][y+1] == self && board[x-2][y+2] == self && board[x-3][y+3] == self && board[x-4][y+4] == self && ( board[x-5][y+5] == 0 || board[x+1][y-1] == 0 ) )
             {
                 score += score_1;
                 add_new_pos_for_two(x,y);
             }
-            //在OOOO中冲五
             if ( board[x+1][y-1] == self && board[x+2][y-2] == self && board[x+3][y-3] == self && board[x+4][y-4] == self && ( board[x+5][y-5] == 0 || board[x-1][y+1] == 0 ) )
             {
                 score += score_1;
                 add_new_pos_for_two(x,y);
             }
-            //在OXOOO中冲五
             if ( board[x-1][y+1] == self && board[x-2][y+2] == 0 && board[x-3][y+3] == self && board[x-4][y+4] == self && board[x-5][y+5] == self )
             {
                 score += score_1;
@@ -2602,7 +2586,6 @@ int CMoveGenerator::set_by_direction2 ( char color , int x , int y , int step, c
                 score += score_1;
                 add_new_pos_for_two(x,y);
             }
-            //在OOXOO中冲五
             if ( board[x-1][y+1] == self && board[x-2][y+2] == self && board[x-3][y+3] == 0 && board[x-4][y+4] == self && board[x-5][y+5] == self )
             {
                 score += score_1;
@@ -2618,8 +2601,7 @@ int CMoveGenerator::set_by_direction2 ( char color , int x , int y , int step, c
                 score += score_1;
                 add_new_pos_for_two(x,y);
             }
-            
-            //在OXXOOO中冲五
+
             if ( board[x-1][y+1] == self && board[x+1][y-1] == 0 && board[x+2][y-2] == self && board[x+3][y-3] == self && board[x+4][y-4] == self )
             {
                 score += score_1;
@@ -2640,7 +2622,6 @@ int CMoveGenerator::set_by_direction2 ( char color , int x , int y , int step, c
                 score += score_1;
                 add_new_pos_for_two(x,y);
             }
-            //在OOXXOO中冲五
             if ( board[x-1][y+1] == self && board[x-2][y+2] == self && board[x+1][y-1] == 0 && board[x+2][y-2] == self && board[x+3][y-3] == self )
             {
                 score += score_1;
@@ -2651,7 +2632,6 @@ int CMoveGenerator::set_by_direction2 ( char color , int x , int y , int step, c
                 score += score_1;
                 add_new_pos_for_two(x,y);
             }
-            //在OXOXOO中冲五
             if ( board[x-1][y+1] == self && board[x+1][y-1] == self && board[x+2][y-2] == 0 && board[x+3][y-3] == self && board[x+4][y-4] == self )
             {
                 score += score_1;
@@ -2672,7 +2652,6 @@ int CMoveGenerator::set_by_direction2 ( char color , int x , int y , int step, c
                 score += score_1;
                 add_new_pos_for_two(x,y);
             }
-            //在OXOOXO中冲五
             if ( board[x-1][y+1] == self && board[x+1][y-1] == self && board[x+2][y-2] == self && board[x+3][y-3] == 0 && board[x+4][y-4] == self )
             {
                 score += score_1;
@@ -2703,7 +2682,6 @@ int CMoveGenerator::set_by_direction2 ( char color , int x , int y , int step, c
             }
         }
 
-        //在OOOOO中冲六
         if ( board[x-1][y+1] == self && board[x-2][y+2] == self && board[x-3][y+3] == self && board[x-4][y+4] == self && board[x-5][y+5] == self )
         {
             score += score_1;
@@ -2712,7 +2690,6 @@ int CMoveGenerator::set_by_direction2 ( char color , int x , int y , int step, c
         {
             score += score_1;
         }
-        //在OXOOOO中冲六
         if ( board[x-1][y+1] == self && board[x+1][y-1] == self && board[x+2][y-2] == self && board[x+3][y-3] == self && board[x+4][y-4] == self )
         {
             score += score_1;
@@ -2721,7 +2698,6 @@ int CMoveGenerator::set_by_direction2 ( char color , int x , int y , int step, c
         {
             score += score_1;
         }
-        //在OOXOOO中冲六
         if ( board[x-1][y+1] == self && board[x-2][y+2] == self && board[x+1][y-1] == self && board[x+2][y-2] == self && board[x+3][y-3] == self )
         {
             score += score_1;
@@ -2732,28 +2708,27 @@ int CMoveGenerator::set_by_direction2 ( char color , int x , int y , int step, c
         }
     }
 
-    
+
     return score;
 }
 
 
-//横向计算分数
+// Set score by horizon direction.
 int CMoveGenerator::set_by_direction3 ( char color , int x , int y , int step, char board[][GRID_NUM] )
 {
-     //确定自己和对手的棋子颜色
-    int self , enemy , highLevel , lowLevel , j , connectCountUp = 0 , connectCountDn = 0 , OcountUp = 0 , OcountDn = 0 , score = 0 , middleCheck[2] = {0,0} , connectCount = 0 , defSuc = 0 , defVT = 0 , canGoFive = 0 , edgeBlock = 0 , Ocount = 0; 
+    int self , enemy , highLevel , lowLevel , j , connectCountUp = 0 , connectCountDn = 0 , OcountUp = 0 , OcountDn = 0 , score = 0 , middleCheck[2] = {0,0} , connectCount = 0 , defSuc = 0 , defVT = 0 , canGoFive = 0 , edgeBlock = 0 , Ocount = 0;
 
     if ( color == 1 )
     {
         self = 1;
-        enemy = 2; 
+        enemy = 2;
     }
-    else 
+    else
     {
         self = 2;
         enemy = 1;
     }
-   
+
     OcountUp = 0;
     OcountDn = 0;
     connectCountUp = 0;
@@ -2762,7 +2737,6 @@ int CMoveGenerator::set_by_direction3 ( char color , int x , int y , int step, c
     highLevel = x;
     lowLevel = x;
 
-     //寻找防守的上下界
     j = y;
     while ( OcountUp < 3 )
     {
@@ -2804,7 +2778,6 @@ int CMoveGenerator::set_by_direction3 ( char color , int x , int y , int step, c
         OcountUp = 2;
     }
 
-   //寻找防守的下界
     j = y;
     while ( OcountDn < 3 )
     {
@@ -2941,326 +2914,316 @@ int CMoveGenerator::set_by_direction3 ( char color , int x , int y , int step, c
     }
     if ( defSuc )
     {
-    if ( connectCount == 1 )
-    {
-        score += score_9;
-    }
-    // 堵四
-    if ( connectCount == 4 )
-    {
-        if ( middleCheck[0] && middleCheck[1] )
+        if ( connectCount == 1 )
         {
-            score += score_2;
-            if ( step == 1 )
-            {
-                if ( Ocount <= 2 )
-                {
-                    m_dead_four_plus = 1;
-                }
-                add_new_pos_for_two(x,y);
-            }
+            score += score_9;
         }
-        else
+        if ( connectCount == 4 )
         {
-            if ( step == 2 )
-            {
-                if ( defVT == V )
-                {
-                    score += score_2;
-                }
-            }
-            else
+            if ( middleCheck[0] && middleCheck[1] )
             {
                 score += score_2;
-                if ( defVT == V )
+                if ( step == 1 )
                 {
-                    m_dead_four_plus = 1;
+                    if ( Ocount <= 2 )
+                    {
+                        m_dead_four_plus = 1;
+                    }
+                    add_new_pos_for_two(x,y);
                 }
-                add_new_pos_for_two(x,y);
-            }
-        }
-    }
-    if ( connectCount == 1 )
-    {
-        if ( board[x][y-1] == 0 && board[x][y-2] == enemy && board[x][y-3] == 0 && board[x][y-4] == 0 && board[x][y-5] == enemy && board[x][y-6] == 0 && board[x][y-7] == 0 )
-        {
-            if ( step == 2 && m_dead_four_plus == 1 )
-            {
-                score += score_4_7; //90
             }
             else
             {
-                score += score_5;
-                if ( step == 1 )
+                if ( step == 2 )
                 {
+                    if ( defVT == V )
+                    {
+                        score += score_2;
+                    }
+                }
+                else
+                {
+                    score += score_2;
+                    if ( defVT == V )
+                    {
+                        m_dead_four_plus = 1;
+                    }
                     add_new_pos_for_two(x,y);
                 }
             }
         }
-        if ( board[x][y+1] == 0 && board[x][y+2] == enemy && board[x][y+3] == 0 && board[x][y+4] == 0 && board[x][y+5] == enemy && board[x][y+6] == 0 && board[x][y+7] == 0 )
+        if ( connectCount == 1 )
         {
-            if ( step == 2 && m_dead_four_plus == 1 )
+            if ( board[x][y-1] == 0 && board[x][y-2] == enemy && board[x][y-3] == 0 && board[x][y-4] == 0 && board[x][y-5] == enemy && board[x][y-6] == 0 && board[x][y-7] == 0 )
             {
-                score += score_4_7; //90
-            }
-            else
-            {
-                score += score_5;
-                if ( step == 1 )
+                if ( step == 2 && m_dead_four_plus == 1 )
                 {
-                    add_new_pos_for_two(x,y);
+                    score += score_4_7; //90
+                }
+                else
+                {
+                    score += score_5;
+                    if ( step == 1 )
+                    {
+                        add_new_pos_for_two(x,y);
+                    }
+                }
+            }
+            if ( board[x][y+1] == 0 && board[x][y+2] == enemy && board[x][y+3] == 0 && board[x][y+4] == 0 && board[x][y+5] == enemy && board[x][y+6] == 0 && board[x][y+7] == 0 )
+            {
+                if ( step == 2 && m_dead_four_plus == 1 )
+                {
+                    score += score_4_7; //90
+                }
+                else
+                {
+                    score += score_5;
+                    if ( step == 1 )
+                    {
+                        add_new_pos_for_two(x,y);
+                    }
                 }
             }
         }
-    }
-    //堵二
-    if ( connectCount == 2 )
-    {
-        if ( middleCheck[0] && middleCheck[1] && board[x][highLevel] == 0 && board[x][lowLevel] == 0 && Ocount <= 2 )
+        if ( connectCount == 2 )
         {
-            if ( step == 2 && m_dead_four_plus == 1 )
+            if ( middleCheck[0] && middleCheck[1] && board[x][highLevel] == 0 && board[x][lowLevel] == 0 && Ocount <= 2 )
             {
-                score += score_4; //90
-            }
-            else
-            {
-                score += score_5;
-                if ( step == 1 )
+                if ( step == 2 && m_dead_four_plus == 1 )
                 {
-                    add_new_pos_for_two(x,y);
+                    score += score_4; //90
+                }
+                else
+                {
+                    score += score_5;
+                    if ( step == 1 )
+                    {
+                        add_new_pos_for_two(x,y);
+                    }
                 }
             }
-        }
-        if ( middleCheck[0] && !middleCheck[1] && board[x][highLevel] == 0 )
-        {
-            if ( board[x][y+1] == 0 && board[x][y+2] == 0 )
+            if ( middleCheck[0] && !middleCheck[1] && board[x][highLevel] == 0 )
             {
-                score += 0;
-            }
-            else
-            {
-                if ( board[x][y+1] == enemy && board[x][y+2] == 0 && board[x][y+3] == 0 && board[x][y+4] == enemy && board[x][y+5] == 0 && ( board[x][y+6] == self || board[x][y+6] == 3 ) )
+                if ( board[x][y+1] == 0 && board[x][y+2] == 0 )
                 {
                     score += 0;
                 }
                 else
                 {
-                    if ( board[x][y+1] == 0 && board[x][y+2] == enemy && board[x][y+3] == 0 && board[x][y+4] == enemy && board[x][y+5] == 0 && ( board[x][y+6] == self || board[x][y+6] == 3 ) )
+                    if ( board[x][y+1] == enemy && board[x][y+2] == 0 && board[x][y+3] == 0 && board[x][y+4] == enemy && board[x][y+5] == 0 && ( board[x][y+6] == self || board[x][y+6] == 3 ) )
                     {
                         score += 0;
                     }
                     else
                     {
-                        if ( board[x][y+1] == enemy && ( board[x][y-1] == self || board[x][y-1] == 3 ) )
+                        if ( board[x][y+1] == 0 && board[x][y+2] == enemy && board[x][y+3] == 0 && board[x][y+4] == enemy && board[x][y+5] == 0 && ( board[x][y+6] == self || board[x][y+6] == 3 ) )
                         {
                             score += 0;
                         }
                         else
                         {
-                            if ( step == 2 && m_dead_four_plus == 1 )
+                            if ( board[x][y+1] == enemy && ( board[x][y-1] == self || board[x][y-1] == 3 ) )
                             {
-                                score += score_4; //90
+                                score += 0;
                             }
                             else
                             {
-                                score += score_5;
-                                if ( step == 1 )
+                                if ( step == 2 && m_dead_four_plus == 1 )
                                 {
-                                    add_new_pos_for_two(x,y);
+                                    score += score_4; //90
+                                }
+                                else
+                                {
+                                    score += score_5;
+                                    if ( step == 1 )
+                                    {
+                                        add_new_pos_for_two(x,y);
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-        }
-        if ( middleCheck[1] && !middleCheck[0] && board[x][lowLevel] == 0 )
-        {
-            if ( board[x][y-1] == 0 && board[x][y-2] == 0 )
+            if ( middleCheck[1] && !middleCheck[0] && board[x][lowLevel] == 0 )
             {
-                score += 0;
-            }
-            else
-            {
-                if ( board[x][y-1] == enemy && board[x][y-2] == 0 && board[x][y-3] == 0 && board[x][y-4] == enemy && board[x][y-5] == 0 && ( board[x][y-6] == self || board[x][y-6] == 3 ) )
+                if ( board[x][y-1] == 0 && board[x][y-2] == 0 )
                 {
                     score += 0;
                 }
                 else
                 {
-                    if ( board[x][y-1] == 0 && board[x][y-2] == enemy && board[x][y-3] == 0 && board[x][y-4] == enemy && board[x][y-5] == 0 && ( board[x][y-6] == self || board[x][y-6] == 3 ) )
+                    if ( board[x][y-1] == enemy && board[x][y-2] == 0 && board[x][y-3] == 0 && board[x][y-4] == enemy && board[x][y-5] == 0 && ( board[x][y-6] == self || board[x][y-6] == 3 ) )
                     {
                         score += 0;
                     }
                     else
                     {
-                        if ( board[x][y-1] == enemy && ( board[x][y+1] == self || board[x][y+1] == 3 ) )
+                        if ( board[x][y-1] == 0 && board[x][y-2] == enemy && board[x][y-3] == 0 && board[x][y-4] == enemy && board[x][y-5] == 0 && ( board[x][y-6] == self || board[x][y-6] == 3 ) )
                         {
                             score += 0;
                         }
                         else
                         {
-                            if ( step == 2 && m_dead_four_plus == 1 )
+                            if ( board[x][y-1] == enemy && ( board[x][y+1] == self || board[x][y+1] == 3 ) )
                             {
-                                score += score_4; //90
+                                score += 0;
                             }
                             else
                             {
-                                score += score_5;
-                                if ( step == 1 )
+                                if ( step == 2 && m_dead_four_plus == 1 )
                                 {
-                                    add_new_pos_for_two(x,y);
+                                    score += score_4; //90
+                                }
+                                else
+                                {
+                                    score += score_5;
+                                    if ( step == 1 )
+                                    {
+                                        add_new_pos_for_two(x,y);
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-        } 
-  
-    }
-    //堵三
-    if ( connectCount == 3 )
-    {
-        if ( middleCheck[0] && middleCheck[1] )
-        { 
-            if ( defVT == T )
-            {        
-                if ( step == 2 && m_dead_four_plus == 1 )
-                {
-                    score += score_3_3; // 200
-                }
-                else
-                {
-                    score += score_4;
-                    if ( step == 1 )
-                    {
-                        add_new_pos_for_two(x,y);
-                    }
-                }
-            }
-            else
-            {
-                if ( step == 2 && m_dead_four_plus == 1 )
-                {
-                    score += score_4_6; //137
-                }
-                else
-                {
-                    score += score_5_5;
-                    if ( step == 1 )
-                    {
-                        add_new_pos_for_two(x,y);
-                    }
-                }
-            }
-        }
 
-        if ( middleCheck[0] && !middleCheck[1] && ( board[x][y+1] == enemy || board[x][y+2] == enemy ) )
-        { 
-            if ( defVT == T )
-            {        
-                if ( step == 2 && m_dead_four_plus == 1 )
-                {
-                    score += score_3_3; // 145
-                }
-                else
-                {
-                    score += score_4;
-                    if ( step == 1 )
-                    {
-                        add_new_pos_for_two(x,y);
-                    }
-                }
-            }
-            else
-            {
-                if ( step == 2 && m_dead_four_plus == 1 )
-                {
-                    score += score_4_6; //80
-                }
-                else
-                {
-                    score += score_5_5;
-                    if ( step == 1 )
-                    {
-                        add_new_pos_for_two(x,y);
-                    }
-                }
-            }
         }
+        if ( connectCount == 3 )
+        {
+            if ( middleCheck[0] && middleCheck[1] )
+            {
+                if ( defVT == T )
+                {
+                    if ( step == 2 && m_dead_four_plus == 1 )
+                    {
+                        score += score_3_3; // 200
+                    }
+                    else
+                    {
+                        score += score_4;
+                        if ( step == 1 )
+                        {
+                            add_new_pos_for_two(x,y);
+                        }
+                    }
+                }
+                else
+                {
+                    if ( step == 2 && m_dead_four_plus == 1 )
+                    {
+                        score += score_4_6; //137
+                    }
+                    else
+                    {
+                        score += score_5_5;
+                        if ( step == 1 )
+                        {
+                            add_new_pos_for_two(x,y);
+                        }
+                    }
+                }
+            }
 
-        if ( !middleCheck[0] && middleCheck[1] && ( board[x][y-1] == enemy || board[x][y-2] == enemy ) )
-        { 
-            if ( defVT == T )
-            {        
-                if ( step == 2 && m_dead_four_plus == 1 )
-                {
-                    score += score_3_3; // 145
-                }
-                else
-                {
-                    score += score_4;
-                    if ( step == 1 )
-                    {
-                        add_new_pos_for_two(x,y);
-                    }
-                }
-            }
-            else
+            if ( middleCheck[0] && !middleCheck[1] && ( board[x][y+1] == enemy || board[x][y+2] == enemy ) )
             {
-                if ( step == 2 && m_dead_four_plus == 1 )
+                if ( defVT == T )
                 {
-                    score += score_4_6; //80
+                    if ( step == 2 && m_dead_four_plus == 1 )
+                    {
+                        score += score_3_3; // 145
+                    }
+                    else
+                    {
+                        score += score_4;
+                        if ( step == 1 )
+                        {
+                            add_new_pos_for_two(x,y);
+                        }
+                    }
                 }
                 else
                 {
-                    score += score_5_5;
-                    if ( step == 1 )
+                    if ( step == 2 && m_dead_four_plus == 1 )
                     {
-                        add_new_pos_for_two(x,y);
+                        score += score_4_6; //80
+                    }
+                    else
+                    {
+                        score += score_5_5;
+                        if ( step == 1 )
+                        {
+                            add_new_pos_for_two(x,y);
+                        }
                     }
                 }
             }
+
+            if ( !middleCheck[0] && middleCheck[1] && ( board[x][y-1] == enemy || board[x][y-2] == enemy ) )
+            {
+                if ( defVT == T )
+                {
+                    if ( step == 2 && m_dead_four_plus == 1 )
+                    {
+                        score += score_3_3; // 145
+                    }
+                    else
+                    {
+                        score += score_4;
+                        if ( step == 1 )
+                        {
+                            add_new_pos_for_two(x,y);
+                        }
+                    }
+                }
+                else
+                {
+                    if ( step == 2 && m_dead_four_plus == 1 )
+                    {
+                        score += score_4_6; //80
+                    }
+                    else
+                    {
+                        score += score_5_5;
+                        if ( step == 1 )
+                        {
+                            add_new_pos_for_two(x,y);
+                        }
+                    }
+                }
+            }
+
         }
-        
-    }
-    // 堵五
-    if ( connectCount == 5 )
-    {
-        score += score_2;
-    }
-    // 防冲七
-    if ( connectCount == 6 )
-    {
-        score += score_2;
-    }
-    // 防冲八
-    if ( connectCount == 7 )
-    {
-        score += score_2;
-    }
-    // 防冲九
-    if ( connectCount == 8 )
-    {
-        score += score_2;
-    }
-    // 防冲十
-    if ( connectCount == 9 )
-    {
-        score += score_2;
-    }
-    // 防冲十一
-    if ( connectCount == 10 )
-    {
-        score += score_2;
-    }
+        if ( connectCount == 5 )
+        {
+            score += score_2;
+        }
+        if ( connectCount == 6 )
+        {
+            score += score_2;
+        }
+        if ( connectCount == 7 )
+        {
+            score += score_2;
+        }
+        if ( connectCount == 8 )
+        {
+            score += score_2;
+        }
+        if ( connectCount == 9 )
+        {
+            score += score_2;
+        }
+        if ( connectCount == 10 )
+        {
+            score += score_2;
+        }
     }
     else
     {
         score = 0;
     }
-    //寻找进攻的上下界
     j = y;
     highLevel = y;
     lowLevel = y;
@@ -3294,8 +3257,8 @@ int CMoveGenerator::set_by_direction3 ( char color , int x , int y , int step, c
                     {
                         edgeBlock = 1;
                         canGoFive = 1;
-                         highLevel = j;
-                         if ( j == y )
+                        highLevel = j;
+                        if ( j == y )
                         {
                             if ( board[x][j+1] == 0 )
                             {
@@ -3323,7 +3286,7 @@ int CMoveGenerator::set_by_direction3 ( char color , int x , int y , int step, c
                                 connectCount ++;
                                 Ocount ++;
                             }
-                         }
+                        }
                         break;
                     }
                 }
@@ -3400,7 +3363,7 @@ int CMoveGenerator::set_by_direction3 ( char color , int x , int y , int step, c
                 {
                     edgeBlock = 1;
                     canGoFive = 1;
-                    sixDecreaseO_2 = 1; 
+                    sixDecreaseO_2 = 1;
                 }
                 else
                 {
@@ -3409,7 +3372,7 @@ int CMoveGenerator::set_by_direction3 ( char color , int x , int y , int step, c
                         edgeBlock = 1;
                         canGoFive = 1;
                         lowLevel = j;
-                         if ( j == y )
+                        if ( j == y )
                         {
                             if ( board[x][j-1] == 0 )
                             {
@@ -3437,7 +3400,7 @@ int CMoveGenerator::set_by_direction3 ( char color , int x , int y , int step, c
                                 connectCount ++;
                                 Ocount ++;
                             }
-                         }
+                        }
                         break;
                     }
                 }
@@ -3494,30 +3457,27 @@ int CMoveGenerator::set_by_direction3 ( char color , int x , int y , int step, c
         lowLevel = y-2;
     }
     sixDecreaseO = sixDecreaseO_1 + sixDecreaseO_2;
-    //确定是连几，寻找进攻加分
-    //冲二
     if ( connectCount == 1 && board[x][lowLevel] == 0 && board[x][highLevel] == 0 )
     {
         if ( Ocount == 0 )
         {
-            score += score_6;           // 活二
+            score += score_6;           //
         }
-        else 
+        else
         {
             if ( Ocount == 1 )
             {
-                score += score_6_5;      //跳二
+                score += score_6_5;      //
             }
             else
             {
                 if ( Ocount == 2)
                 {
-                    score += score_6_6; //跳二
+                    score += score_6_6; //
                 }
             }
         }
     }
-    //冲三
     if ( connectCount == 2 )
     {
         if ( board[x][highLevel] == 0 && board[x][lowLevel] == 0 )
@@ -3527,7 +3487,7 @@ int CMoveGenerator::set_by_direction3 ( char color , int x , int y , int step, c
                 if ( step == 1 )
                 {
                     score += score_3;
-                    
+
                     add_new_pos_for_two(x,y);
                 }
                 else
@@ -3542,7 +3502,7 @@ int CMoveGenerator::set_by_direction3 ( char color , int x , int y , int step, c
         }
         if ( ( board[x][highLevel] == 0 && board[x][lowLevel] != 0 && board[x][lowLevel] != self ) || ( board[x][highLevel] != 0 && board[x][highLevel] != self && board[x][lowLevel] == 0 ) )
         {
-               score += score_6_6;
+            score += score_6_6;
         }
         if ( board[x][lowLevel] != 0 && board[x][lowLevel] != self && board [x][highLevel] != 0 && board [x][highLevel] != self && highLevel - lowLevel >= 7 )
         {
@@ -3551,7 +3511,7 @@ int CMoveGenerator::set_by_direction3 ( char color , int x , int y , int step, c
                 if ( step == 1 )
                 {
                     score += score_3;
-                    
+
                     add_new_pos_for_two(x,y);
                 }
                 else
@@ -3565,8 +3525,6 @@ int CMoveGenerator::set_by_direction3 ( char color , int x , int y , int step, c
             }
         }
     }
-    //冲四
-        //冲四
     if ( connectCount == 3 )
     {
         if ( board[x][lowLevel] == 0 && board[x][highLevel] == 0 )
@@ -3576,7 +3534,7 @@ int CMoveGenerator::set_by_direction3 ( char color , int x , int y , int step, c
                 if ( step == 1 )
                 {
                     score += score_2_9;
-                    
+
                     add_new_pos_for_two(x,y);
                 }
                 else
@@ -3604,24 +3562,20 @@ int CMoveGenerator::set_by_direction3 ( char color , int x , int y , int step, c
             score += score_3_2;
         }
     }
-    //冲五
     if ( connectCount >= 4 )
     {
         if ( step == 1 )
         {
-            //在OOOO中冲五
             if ( board[x][y-1] == self && board[x][y-2] == self && board[x][y-3] == self && board[x][y-4] == self && ( board[x][y-5] == 0 || board[x][y+1] == 0 ) )
             {
                 score += score_1;
                 add_new_pos_for_two(x,y);
             }
-            //在OOOO中冲五
             if ( board[x][y+1] == self && board[x][y+2] == self && board[x][y+3] == self && board[x][y+4] == self && ( board[x][y+5] == 0 || board[x][y-1] == 0 ) )
             {
                 score += score_1;
                 add_new_pos_for_two(x,y);
             }
-            //在OXOOO中冲五
             if ( board[x][y-1] == self && board[x][y-2] == 0 && board[x][y-3] == self && board[x][y-4] == self && board[x][y-5] == self )
             {
                 score += score_1;
@@ -3652,7 +3606,6 @@ int CMoveGenerator::set_by_direction3 ( char color , int x , int y , int step, c
                 score += score_1;
                 add_new_pos_for_two(x,y);
             }
-            //在OOXOO中冲五
             if ( board[x][y-1] == self && board[x][y-2] == self && board[x][y-3] == 0 && board[x][y-4] == self && board[x][y-5] == self )
             {
                 score += score_1;
@@ -3668,7 +3621,6 @@ int CMoveGenerator::set_by_direction3 ( char color , int x , int y , int step, c
                 score += score_1;
                 add_new_pos_for_two(x,y);
             }
-            //在OXXOOO中冲五
             if ( board[x][y-1] == self && board[x][y+1] == 0 && board[x][y+2] == self && board[x][y+3] == self && board[x][y+4] == self )
             {
                 score += score_1;
@@ -3689,7 +3641,6 @@ int CMoveGenerator::set_by_direction3 ( char color , int x , int y , int step, c
                 score += score_1;
                 add_new_pos_for_two(x,y);
             }
-            //在OOXXOO中冲五
             if ( board[x][y-1] == self && board[x][y-2] == self && board[x][y+1] == 0 && board[x][y+2] == self && board[x][y+3] == self )
             {
                 score += score_1;
@@ -3700,7 +3651,6 @@ int CMoveGenerator::set_by_direction3 ( char color , int x , int y , int step, c
                 score += score_1;
                 add_new_pos_for_two(x,y);
             }
-            //在OXOXOO中冲五
             if ( board[x][y-1] == self && board[x][y+1] == self && board[x][y+2] == 0 && board[x][y+3] == self && board[x][y+4] == self )
             {
                 score += score_1;
@@ -3721,7 +3671,6 @@ int CMoveGenerator::set_by_direction3 ( char color , int x , int y , int step, c
                 score += score_1;
                 add_new_pos_for_two(x,y);
             }
-            //在OXOOXO中冲五
             if ( board[x][y-1] == self && board[x][y+1] == self && board[x][y+2] == self && board[x][y+3] == 0 && board[x][y+4] == self )
             {
                 score += score_1;
@@ -3751,8 +3700,7 @@ int CMoveGenerator::set_by_direction3 ( char color , int x , int y , int step, c
                 }
             }
         }
-    
-        //在OOOOO中冲六
+
         if ( board[x][y-1] == self && board[x][y-2] == self && board[x][y-3] == self && board[x][y-4] == self && board[x][y-5] == self )
         {
             score += score_1;
@@ -3761,7 +3709,6 @@ int CMoveGenerator::set_by_direction3 ( char color , int x , int y , int step, c
         {
             score += score_1;
         }
-        //在OXOOOO中冲六
         if ( board[x][y-1] == self && board[x][y+1] == self && board[x][y+2] == self && board[x][y+3] == self && board[x][y+4] == self )
         {
             score += score_1;
@@ -3770,7 +3717,6 @@ int CMoveGenerator::set_by_direction3 ( char color , int x , int y , int step, c
         {
             score += score_1;
         }
-        //在OOXOOO中冲六
         if ( board[x][y-1] == self && board[x][y-2] == self && board[x][y+1] == self && board[x][y+2] == self && board[x][y+3] == self )
         {
             score += score_1;
@@ -3783,23 +3729,22 @@ int CMoveGenerator::set_by_direction3 ( char color , int x , int y , int step, c
     return score;
 }
 
-//斜方向（4向）计算分数
+// Set scores by right up direction.
 int CMoveGenerator::set_by_direction4 ( char color , int x , int y , int step, char board[][GRID_NUM] )
 {
-    //确定自己和对手的棋子颜色
-    int self , enemy , highLevelx , lowLevelx , highLevely , lowLevely , i , j , connectCountUp = 0 , connectCountDn = 0 , OcountUp = 0 , OcountDn = 0 , score = 0 , middleCheck[2] = {0,0} , connectCount = 0 , defSuc = 0 , defVT = 0 , canGoFive = 0 , edgeBlock = 0 , Ocount = 0; 
+    int self , enemy , highLevelx , lowLevelx , highLevely , lowLevely , i , j , connectCountUp = 0 , connectCountDn = 0 , OcountUp = 0 , OcountDn = 0 , score = 0 , middleCheck[2] = {0,0} , connectCount = 0 , defSuc = 0 , defVT = 0 , canGoFive = 0 , edgeBlock = 0 , Ocount = 0;
 
     if ( color == 1 )
     {
         self = 1;
-        enemy = 2; 
+        enemy = 2;
     }
-    else 
+    else
     {
         self = 2;
         enemy = 1;
     }
-   
+
     OcountUp = 0;
     OcountDn = 0;
     connectCountUp = 0;
@@ -3810,7 +3755,6 @@ int CMoveGenerator::set_by_direction4 ( char color , int x , int y , int step, c
     lowLevelx = x;
     lowLevely = y;
 
-     //寻找防守的上下界
     i = x;
     j = y;
     while ( OcountUp < 3 )
@@ -3857,7 +3801,6 @@ int CMoveGenerator::set_by_direction4 ( char color , int x , int y , int step, c
         OcountUp = 2;
     }
 
-   //寻找防守的下界
     i = x;
     j = y;
     while ( OcountDn < 3 )
@@ -4013,326 +3956,316 @@ int CMoveGenerator::set_by_direction4 ( char color , int x , int y , int step, c
     }
     if ( defSuc )
     {
-    if ( connectCount == 1 )
-    {
-        score += score_9;
-    }    
-    // 堵四
-    if ( connectCount == 4 )
-    {
-        if ( middleCheck[0] && middleCheck[1] )
+        if ( connectCount == 1 )
         {
-            score += score_2;
-            if ( step == 1 )
-            {
-                if ( Ocount <= 2 )
-                {
-                    m_dead_four_plus = 1;
-                }
-                add_new_pos_for_two(x,y);
-            }
+            score += score_9;
         }
-        else
+        if ( connectCount == 4 )
         {
-            if ( step == 2 )
-            {
-                if ( defVT == V )
-                {
-                    score += score_2;
-                }
-            }
-            else
+            if ( middleCheck[0] && middleCheck[1] )
             {
                 score += score_2;
-                if ( defVT == V )
+                if ( step == 1 )
                 {
-                    m_dead_four_plus = 1;
+                    if ( Ocount <= 2 )
+                    {
+                        m_dead_four_plus = 1;
+                    }
+                    add_new_pos_for_two(x,y);
                 }
-                add_new_pos_for_two(x,y);
-            }
-        }
-    }
-    if ( connectCount == 1 )
-    {
-        if ( board[x-1][y-1] == 0 && board[x-2][y-2] == enemy && board[x-3][y-3] == 0 && board[x-4][y-4] == 0 && board[x-5][y-5] == enemy && board[x-6][y-6] == 0 && board[x-7][y-7] == 0 )
-        {
-            if ( step == 2 && m_dead_four_plus == 1 )
-            {
-                score += score_4_7; //90
             }
             else
             {
-                score += score_5;
-                if ( step == 1 )
+                if ( step == 2 )
                 {
+                    if ( defVT == V )
+                    {
+                        score += score_2;
+                    }
+                }
+                else
+                {
+                    score += score_2;
+                    if ( defVT == V )
+                    {
+                        m_dead_four_plus = 1;
+                    }
                     add_new_pos_for_two(x,y);
                 }
             }
         }
-        if ( board[x+1][y+1] == 0 && board[x+2][y+2] == enemy && board[x+3][y+3] == 0 && board[x+4][y+4] == 0 && board[x+5][y+5] == enemy && board[x+6][y+6] == 0 && board[x+7][y+7] == 0 )
+        if ( connectCount == 1 )
         {
-            if ( step == 2 && m_dead_four_plus == 1 )
+            if ( board[x-1][y-1] == 0 && board[x-2][y-2] == enemy && board[x-3][y-3] == 0 && board[x-4][y-4] == 0 && board[x-5][y-5] == enemy && board[x-6][y-6] == 0 && board[x-7][y-7] == 0 )
             {
-                score += score_4_7; //90
-            }
-            else
-            {
-                score += score_5;
-                if ( step == 1 )
+                if ( step == 2 && m_dead_four_plus == 1 )
                 {
-                    add_new_pos_for_two(x,y);
+                    score += score_4_7; //90
+                }
+                else
+                {
+                    score += score_5;
+                    if ( step == 1 )
+                    {
+                        add_new_pos_for_two(x,y);
+                    }
+                }
+            }
+            if ( board[x+1][y+1] == 0 && board[x+2][y+2] == enemy && board[x+3][y+3] == 0 && board[x+4][y+4] == 0 && board[x+5][y+5] == enemy && board[x+6][y+6] == 0 && board[x+7][y+7] == 0 )
+            {
+                if ( step == 2 && m_dead_four_plus == 1 )
+                {
+                    score += score_4_7; //90
+                }
+                else
+                {
+                    score += score_5;
+                    if ( step == 1 )
+                    {
+                        add_new_pos_for_two(x,y);
+                    }
                 }
             }
         }
-    }
-    //堵二
-    if ( connectCount == 2 )
-    {
-        if ( middleCheck[0] && middleCheck[1] && board[highLevelx][highLevely] == 0 && board[lowLevelx][lowLevely] == 0 && Ocount <= 2 )
+        if ( connectCount == 2 )
         {
-            if ( step == 2 && m_dead_four_plus == 1 )
+            if ( middleCheck[0] && middleCheck[1] && board[highLevelx][highLevely] == 0 && board[lowLevelx][lowLevely] == 0 && Ocount <= 2 )
             {
-                score += score_4; //90
-            }
-            else
-            {
-                score += score_5;
-                if ( step == 1 )
+                if ( step == 2 && m_dead_four_plus == 1 )
                 {
-                    add_new_pos_for_two(x,y);
+                    score += score_4; //90
+                }
+                else
+                {
+                    score += score_5;
+                    if ( step == 1 )
+                    {
+                        add_new_pos_for_two(x,y);
+                    }
                 }
             }
-        }
-        if ( middleCheck[0] && !middleCheck[1] && board[highLevelx][highLevely] == 0 )
-        {
-            if ( board[x-1][y-1] == 0 && board[x-2][y-2] == 0 )
+            if ( middleCheck[0] && !middleCheck[1] && board[highLevelx][highLevely] == 0 )
             {
-                score += 0;
-            }
-            else
-            {
-                if ( board[x-1][y-1] == enemy && board[x-2][y-2] == 0 && board[x-3][y-3] == 0 && board[x-4][y-4] == enemy && board[x-5][y-5] == 0 && ( board[x-6][y-6] == self || board[x-6][y-6] == 3 ) )
+                if ( board[x-1][y-1] == 0 && board[x-2][y-2] == 0 )
                 {
                     score += 0;
                 }
                 else
                 {
-                    if ( board[x-1][y-1] == 0 && board[x-2][y-2] == enemy && board[x-3][y-3] == 0 && board[x-4][y-4] == enemy && board[x-5][y-5] == 0 && ( board[x-6][y-6] == self || board[x-6][y-6] == 3 ) )
+                    if ( board[x-1][y-1] == enemy && board[x-2][y-2] == 0 && board[x-3][y-3] == 0 && board[x-4][y-4] == enemy && board[x-5][y-5] == 0 && ( board[x-6][y-6] == self || board[x-6][y-6] == 3 ) )
                     {
                         score += 0;
                     }
                     else
                     {
-                        if ( board[x-1][y-1] == enemy && ( board[x+1][y+1] == self || board[x+1][y+1] == 3 ) )
+                        if ( board[x-1][y-1] == 0 && board[x-2][y-2] == enemy && board[x-3][y-3] == 0 && board[x-4][y-4] == enemy && board[x-5][y-5] == 0 && ( board[x-6][y-6] == self || board[x-6][y-6] == 3 ) )
                         {
                             score += 0;
                         }
                         else
                         {
-                            if ( step == 2 && m_dead_four_plus == 1 )
+                            if ( board[x-1][y-1] == enemy && ( board[x+1][y+1] == self || board[x+1][y+1] == 3 ) )
                             {
-                                score += score_4; //90
+                                score += 0;
                             }
                             else
                             {
-                                score += score_5;
-                                if ( step == 1 )
+                                if ( step == 2 && m_dead_four_plus == 1 )
                                 {
-                                    add_new_pos_for_two(x,y);
+                                    score += score_4; //90
+                                }
+                                else
+                                {
+                                    score += score_5;
+                                    if ( step == 1 )
+                                    {
+                                        add_new_pos_for_two(x,y);
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-        }
-        if ( middleCheck[1] && !middleCheck[0] && board[lowLevelx][lowLevely] == 0 )
-        {
-            if ( board[x+1][y+1] == 0 && board[x+2][y+2] == 0 )
+            if ( middleCheck[1] && !middleCheck[0] && board[lowLevelx][lowLevely] == 0 )
             {
-                score += 0;
-            }
-            else
-            {
-                if ( board[x+1][y+1] == enemy && board[x+2][y+2] == 0 && board[x+3][y+3] == 0 && board[x+4][y+4] == enemy && board[x+5][y+5] == 0 && ( board[x+6][y+6] == self || board[x+6][y+6] == 3 ) )
+                if ( board[x+1][y+1] == 0 && board[x+2][y+2] == 0 )
                 {
                     score += 0;
                 }
                 else
                 {
-                    if ( board[x+1][y+1] == 0 && board[x+2][y+2] == enemy && board[x+3][y+3] == 0 && board[x+4][y+4] == enemy && board[x+5][y+5] == 0 && ( board[x+6][y+6] == self || board[x+6][y+6] == 3 ) )
+                    if ( board[x+1][y+1] == enemy && board[x+2][y+2] == 0 && board[x+3][y+3] == 0 && board[x+4][y+4] == enemy && board[x+5][y+5] == 0 && ( board[x+6][y+6] == self || board[x+6][y+6] == 3 ) )
                     {
                         score += 0;
                     }
                     else
                     {
-                        if ( board[x+1][y+1] == enemy && ( board[x-1][y-1] == self || board[x-1][y-1] == 3 ) )
+                        if ( board[x+1][y+1] == 0 && board[x+2][y+2] == enemy && board[x+3][y+3] == 0 && board[x+4][y+4] == enemy && board[x+5][y+5] == 0 && ( board[x+6][y+6] == self || board[x+6][y+6] == 3 ) )
                         {
                             score += 0;
                         }
                         else
                         {
-                            if ( step == 2 && m_dead_four_plus == 1 )
+                            if ( board[x+1][y+1] == enemy && ( board[x-1][y-1] == self || board[x-1][y-1] == 3 ) )
                             {
-                                score += score_4; //90
+                                score += 0;
                             }
                             else
                             {
-                                score += score_5;
-                                if ( step == 1 )
+                                if ( step == 2 && m_dead_four_plus == 1 )
                                 {
-                                    add_new_pos_for_two(x,y);
+                                    score += score_4; //90
+                                }
+                                else
+                                {
+                                    score += score_5;
+                                    if ( step == 1 )
+                                    {
+                                        add_new_pos_for_two(x,y);
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-        } 
-  
-    }
-    //堵三
-    if ( connectCount == 3 )
-    {
-        if ( middleCheck[0] && middleCheck[1] )
-        { 
-            if ( defVT == T )
-            {        
-                if ( step == 2 && m_dead_four_plus == 1 )
-                {
-                    score += score_3_3; // 200
-                }
-                else
-                {
-                    score += score_4;
-                    if ( step == 1 )
-                    {
-                        add_new_pos_for_two(x,y);
-                    }
-                }
-            }
-            else
-            {
-                if ( step == 2 && m_dead_four_plus == 1 )
-                {
-                    score += score_4_6; //137
-                }
-                else
-                {
-                    score += score_5_5;
-                    if ( step == 1 )
-                    {
-                        add_new_pos_for_two(x,y);
-                    }
-                }
-            }
-        }
 
-        if ( middleCheck[0] && !middleCheck[1] && ( board[x-1][y-1] == enemy || board[x-2][y-2] == enemy ) )
-        { 
-            if ( defVT == T )
-            {        
-                if ( step == 2 && m_dead_four_plus == 1 )
-                {
-                    score += score_3_3; // 145
-                }
-                else
-                {
-                    score += score_4;
-                    if ( step == 1 )
-                    {
-                        add_new_pos_for_two(x,y);
-                    }
-                }
-            }
-            else
-            {
-                if ( step == 2 && m_dead_four_plus == 1 )
-                {
-                    score += score_4_6; //80
-                }
-                else
-                {
-                    score += score_5_5;
-                    if ( step == 1 )
-                    {
-                        add_new_pos_for_two(x,y);
-                    }
-                }
-            }
         }
+        if ( connectCount == 3 )
+        {
+            if ( middleCheck[0] && middleCheck[1] )
+            {
+                if ( defVT == T )
+                {
+                    if ( step == 2 && m_dead_four_plus == 1 )
+                    {
+                        score += score_3_3; // 200
+                    }
+                    else
+                    {
+                        score += score_4;
+                        if ( step == 1 )
+                        {
+                            add_new_pos_for_two(x,y);
+                        }
+                    }
+                }
+                else
+                {
+                    if ( step == 2 && m_dead_four_plus == 1 )
+                    {
+                        score += score_4_6; //137
+                    }
+                    else
+                    {
+                        score += score_5_5;
+                        if ( step == 1 )
+                        {
+                            add_new_pos_for_two(x,y);
+                        }
+                    }
+                }
+            }
 
-        if ( !middleCheck[0] && middleCheck[1] && ( board[x+1][y+1] == enemy || board[x+2][y+2] == enemy ) )
-        { 
-            if ( defVT == T )
+            if ( middleCheck[0] && !middleCheck[1] && ( board[x-1][y-1] == enemy || board[x-2][y-2] == enemy ) )
             {
-                if ( step == 2 && m_dead_four_plus == 1 )
+                if ( defVT == T )
                 {
-                    score += score_3_3; // 145
+                    if ( step == 2 && m_dead_four_plus == 1 )
+                    {
+                        score += score_3_3; // 145
+                    }
+                    else
+                    {
+                        score += score_4;
+                        if ( step == 1 )
+                        {
+                            add_new_pos_for_two(x,y);
+                        }
+                    }
                 }
                 else
                 {
-                    score += score_4;
-                    if ( step == 1 )
+                    if ( step == 2 && m_dead_four_plus == 1 )
                     {
-                        add_new_pos_for_two(x,y);
+                        score += score_4_6; //80
+                    }
+                    else
+                    {
+                        score += score_5_5;
+                        if ( step == 1 )
+                        {
+                            add_new_pos_for_two(x,y);
+                        }
                     }
                 }
             }
-            else
+
+            if ( !middleCheck[0] && middleCheck[1] && ( board[x+1][y+1] == enemy || board[x+2][y+2] == enemy ) )
             {
-                if ( step == 2 && m_dead_four_plus == 1 )
+                if ( defVT == T )
                 {
-                    score += score_4_6; //80
+                    if ( step == 2 && m_dead_four_plus == 1 )
+                    {
+                        score += score_3_3; // 145
+                    }
+                    else
+                    {
+                        score += score_4;
+                        if ( step == 1 )
+                        {
+                            add_new_pos_for_two(x,y);
+                        }
+                    }
                 }
                 else
                 {
-                    score += score_5_5;
-                    if ( step == 1 )
+                    if ( step == 2 && m_dead_four_plus == 1 )
                     {
-                        add_new_pos_for_two(x,y);
+                        score += score_4_6; //80
+                    }
+                    else
+                    {
+                        score += score_5_5;
+                        if ( step == 1 )
+                        {
+                            add_new_pos_for_two(x,y);
+                        }
                     }
                 }
             }
+
         }
-        
-    }
-    // 堵五
-    if ( connectCount == 5 )
-    {
-        score += score_2;
-    }
-    // 防冲七
-    if ( connectCount == 6 )
-    {
-        score += score_2;
-    }
-    // 防冲八
-    if ( connectCount == 7 )
-    {
-        score += score_2;
-    }
-    // 防冲九
-    if ( connectCount == 8 )
-    {
-        score += score_2;
-    }
-    // 防冲十
-    if ( connectCount == 9 )
-    {
-        score += score_2;
-    }
-    // 防冲十一
-    if ( connectCount == 10 )
-    {
-        score += score_2;
-    }
+        if ( connectCount == 5 )
+        {
+            score += score_2;
+        }
+        if ( connectCount == 6 )
+        {
+            score += score_2;
+        }
+        if ( connectCount == 7 )
+        {
+            score += score_2;
+        }
+        if ( connectCount == 8 )
+        {
+            score += score_2;
+        }
+        if ( connectCount == 9 )
+        {
+            score += score_2;
+        }
+        if ( connectCount == 10 )
+        {
+            score += score_2;
+        }
     }
     else
     {
         score = 0;
     }
-    //寻找进攻的上下界
     i = x;
     j = y;
     highLevelx = x;
@@ -4372,7 +4305,7 @@ int CMoveGenerator::set_by_direction4 ( char color , int x , int y , int step, c
                         canGoFive = 1;
                         highLevelx = i;
                         highLevely = j;
-                         if ( i == x )
+                        if ( i == x )
                         {
                             if ( board[i-1][j-1] == 0 )
                             {
@@ -4402,7 +4335,7 @@ int CMoveGenerator::set_by_direction4 ( char color , int x , int y , int step, c
                                 connectCount ++;
                                 Ocount ++;
                             }
-                         }
+                        }
                         break;
                     }
                 }
@@ -4497,7 +4430,7 @@ int CMoveGenerator::set_by_direction4 ( char color , int x , int y , int step, c
                         canGoFive = 1;
                         lowLevelx = i;
                         lowLevely = j;
-                         if ( i == x )
+                        if ( i == x )
                         {
                             if ( board[i+1][j+1] == 0 )
                             {
@@ -4527,7 +4460,7 @@ int CMoveGenerator::set_by_direction4 ( char color , int x , int y , int step, c
                                 connectCount ++;
                                 Ocount ++;
                             }
-                         }
+                        }
                         break;
                     }
                 }
@@ -4590,30 +4523,27 @@ int CMoveGenerator::set_by_direction4 ( char color , int x , int y , int step, c
         lowLevely = y+2;
     }
     sixDecreaseO = sixDecreaseO_1 + sixDecreaseO_2 ;
-    //确定是连几，寻找进攻加分
-    //冲二
     if ( connectCount == 1 && board[lowLevelx][lowLevely] == 0 && board[highLevelx][highLevely] == 0 )
     {
         if ( Ocount == 0 )
         {
-            score += score_6;           // 活二
+            score += score_6;           //
         }
-        else 
+        else
         {
             if ( Ocount == 1 )
             {
-                score += score_6_5;      //跳二
+                score += score_6_5;      //
             }
             else
             {
                 if ( Ocount == 2)
                 {
-                    score += score_6_6; //跳二
+                    score += score_6_6; //
                 }
             }
         }
     }
-    //冲三
     if ( connectCount == 2 )
     {
         if ( board[highLevelx][highLevely] == 0 && board[lowLevelx][lowLevely] == 0 )
@@ -4623,7 +4553,7 @@ int CMoveGenerator::set_by_direction4 ( char color , int x , int y , int step, c
                 if ( step == 1 )
                 {
                     score += score_3;
-                    
+
                     add_new_pos_for_two(x,y);
                 }
                 else
@@ -4647,7 +4577,7 @@ int CMoveGenerator::set_by_direction4 ( char color , int x , int y , int step, c
                 if ( step == 1 )
                 {
                     score += score_3;
-                    
+
                     add_new_pos_for_two(x,y);
                 }
                 else
@@ -4661,7 +4591,6 @@ int CMoveGenerator::set_by_direction4 ( char color , int x , int y , int step, c
             }
         }
     }
-    //冲四
     if ( connectCount == 3 )
     {
         if ( board[lowLevelx][lowLevely] == 0 && board[highLevelx][highLevely] == 0 )
@@ -4671,7 +4600,7 @@ int CMoveGenerator::set_by_direction4 ( char color , int x , int y , int step, c
                 if ( step == 1 )
                 {
                     score += score_2_9;
-                    
+
                     add_new_pos_for_two(x,y);
                 }
                 else
@@ -4699,24 +4628,20 @@ int CMoveGenerator::set_by_direction4 ( char color , int x , int y , int step, c
             }
         }
     }
-    //冲五
     if ( connectCount >= 4 )
     {
         if ( step == 1 )
         {
-            //在OOOO中冲五
             if ( board[x-1][y-1] == self && board[x-2][y-2] == self && board[x-3][y-3] == self && board[x-4][y-4] == self && ( board[x-5][y-5] == 0 || board[x+1][y+1] == 0 ) )
             {
                 score += score_1;
                 add_new_pos_for_two(x,y);
             }
-            //在OOOO中冲五
             if ( board[x+1][y+1] == self && board[x+2][y+2] == self && board[x+3][y+3] == self && board[x+4][y+4] == self && ( board[x+5][y+5] == 0 || board[x-1][y-1] == 0 ) )
             {
                 score += score_1;
                 add_new_pos_for_two(x,y);
             }
-            //在OXOOO中冲五
             if ( board[x-1][y-1] == self && board[x-2][y-2] == 0 && board[x-3][y-3] == self && board[x-4][y-4] == self && board[x-5][y-5] == self )
             {
                 score += score_1;
@@ -4747,7 +4672,6 @@ int CMoveGenerator::set_by_direction4 ( char color , int x , int y , int step, c
                 score += score_1;
                 add_new_pos_for_two(x,y);
             }
-            //在OOXOO中冲五
             if ( board[x-1][y-1] == self && board[x-2][y-2] == self && board[x-3][y-3] == 0 && board[x-4][y-4] == self && board[x-5][y-5] == self )
             {
                 score += score_1;
@@ -4763,8 +4687,7 @@ int CMoveGenerator::set_by_direction4 ( char color , int x , int y , int step, c
                 score += score_1;
                 add_new_pos_for_two(x,y);
             }
-            
-            //在OXXOOO中冲五
+
             if ( board[x-1][y-1] == self && board[x+1][y+1] == 0 && board[x+2][y+2] == self && board[x+3][y+3] == self && board[x+4][y+4] == self )
             {
                 score += score_1;
@@ -4785,7 +4708,6 @@ int CMoveGenerator::set_by_direction4 ( char color , int x , int y , int step, c
                 score += score_1;
                 add_new_pos_for_two(x,y);
             }
-            //在OOXXOO中冲五
             if ( board[x-1][y-1] == self && board[x-2][y-2] == self && board[x+1][y+1] == 0 && board[x+2][y+2] == self && board[x+3][y+3] == self )
             {
                 score += score_1;
@@ -4796,7 +4718,6 @@ int CMoveGenerator::set_by_direction4 ( char color , int x , int y , int step, c
                 score += score_1;
                 add_new_pos_for_two(x,y);
             }
-            //在OXOXOO中冲五
             if ( board[x-1][y-1] == self && board[x+1][y+1] == self && board[x+2][y+2] == 0 && board[x+3][y+3] == self && board[x+4][y+4] == self )
             {
                 score += score_1;
@@ -4817,7 +4738,6 @@ int CMoveGenerator::set_by_direction4 ( char color , int x , int y , int step, c
                 score += score_1;
                 add_new_pos_for_two(x,y);
             }
-            //在OXOOXO中冲五
             if ( board[x-1][y-1] == self && board[x+1][y+1] == self && board[x+2][y+2] == self && board[x+3][y+3] == 0 && board[x+4][y+4] == self )
             {
                 score += score_1;
@@ -4847,8 +4767,7 @@ int CMoveGenerator::set_by_direction4 ( char color , int x , int y , int step, c
                 }
             }
         }
-    
-        //在OOOOO中冲六
+
         if ( board[x-1][y-1] == self && board[x-2][y-2] == self && board[x-3][y-3] == self && board[x-4][y-4] == self && board[x-5][y-5] == self )
         {
             score += score_1;
@@ -4857,7 +4776,6 @@ int CMoveGenerator::set_by_direction4 ( char color , int x , int y , int step, c
         {
             score += score_1;
         }
-        //在OXOOOO中冲六
         if ( board[x-1][y-1] == self && board[x+1][y+1] == self && board[x+2][y+2] == self && board[x+3][y+3] == self && board[x+4][y+4] == self )
         {
             score += score_1;
@@ -4866,7 +4784,6 @@ int CMoveGenerator::set_by_direction4 ( char color , int x , int y , int step, c
         {
             score += score_1;
         }
-        //在OOXOOO中冲六
         if ( board[x-1][y-1] == self && board[x-2][y-2] == self && board[x+1][y+1] == self && board[x+2][y+2] == self && board[x+3][y+3] == self )
         {
             score += score_1;

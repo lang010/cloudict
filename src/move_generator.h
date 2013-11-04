@@ -1,7 +1,21 @@
+/*
+ * Copyright (c) 2008-2013 Hao Cui<>,
+ *                         Liang Li<liliang010@gmail.com>,
+ *                         Ruijian Wang<>,
+ *                         Siran Lin<>.
+ *                         All rights reserved.
+ *
+ * This program is a free software; you can redistribute it and/or modify
+ * it under the terms of the BSD license. See LICENSE.txt for details.
+ *
+ * 2013/11/01
+ *
+ */
+
 #ifndef MOVEGENERATER_H_
 #define MOVEGENERATER_H_
 
-#include "structs.h"
+#include "defines.h"
 
 class CSearchEngine;
 
@@ -35,6 +49,7 @@ class CMoveGenerator {
         std::vector<pos_t> m_pos_to_update;
         std::vector<pos_t> m_pos_to_update_special;
 
+        int map[GRID_NUM][GRID_NUM];
 };
 
 #endif

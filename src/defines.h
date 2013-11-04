@@ -1,4 +1,16 @@
-
+/*
+ * Copyright (c) 2008-2013 Hao Cui<>,
+ *                         Liang Li<liliang010@gmail.com>,
+ *                         Ruijian Wang<>,
+ *                         Siran Lin<>.
+ *                         All rights reserved.
+ *
+ * This program is a free software; you can redistribute it and/or modify
+ * it under the terms of the BSD license. See LICENSE.txt for details.
+ *
+ * 2013/11/01
+ *
+ */
 
 #ifndef DEFINE_H_
 #define DEFINE_H_
@@ -53,7 +65,7 @@ typedef struct chess
     int score;
 }move_one_t;
 
-extern int g_board_base_score[19][19];             //ÆåÅÌµÄ»ù´¡·ÖÊý
+extern int g_board_base_score[GRID_NUM-2][GRID_NUM-2];             // Base scores for each points in the board, defined in evaluation.cc
 
 #endif
 

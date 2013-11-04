@@ -1,3 +1,16 @@
+/*
+ * Copyright (c) 2008-2013 Hao Cui<>,
+ *                         Liang Li<liliang010@gmail.com>,
+ *                         Ruijian Wang<>,
+ *                         Siran Lin<>.
+ *                         All rights reserved.
+ *
+ * This program is a free software; you can redistribute it and/or modify
+ * it under the terms of the BSD license. See LICENSE.txt for details.
+ *
+ * 2013/11/01
+ *
+ */
 
 #include "move_generator.h"
 #include "evaluation.h"
@@ -15,7 +28,7 @@ class CSearchEngine {
         int m_total_nodes;
 
     private:
-        char                m_board[GRID_NUM][GRID_NUM];                    //´æ´¢Æå¾Ö
+        char                m_board[GRID_NUM][GRID_NUM];                    // The board in the search engine.
         char                m_chess_type;
         int                 m_alphabeta_depth;
         CMoveGenerator      m_move_gernerator;

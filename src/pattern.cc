@@ -1,18 +1,17 @@
 /*
- * Copyright (c) 2008-2013 Hao Cui<>,
+ * Copyright (c) 2008-2013 Hao Cui<bit.cuihao@gmail.com>,
  *                         Liang Li<liliang010@gmail.com>,
- *                         Ruijian Wang<>,
- *                         Siran Lin<>.
+ *                         Ruijian Wang<wrjchn@gmail.com>,
+ *                         Siran Lin<37863581@qq.com>.
  *                         All rights reserved.
  *
  * This program is a free software; you can redistribute it and/or modify
  * it under the terms of the BSD license. See LICENSE.txt for details.
  *
- * 2013/11/01
+ * Date: 2013/11/01
  *
  */
 
-#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include "pattern.h"
@@ -35,15 +34,15 @@ pos_t transformation2[8] = {
   {-1,  0}, /* from right to left */
 
   { 0,  1}, /* from up to down */
-  
+
   { 0, -1}, /* from down to up */
 
   { 1,  1}, /* from left up corner to right down corner*/
 
   { 1, -1}, /* from left down corner to right up corner*/
-  
+
   {-1,  1}, /* from right up corner to left down corner*/
-  
+
   {-1, -1}  /* from right down corner to left up corner*/
 };
 
@@ -52,11 +51,10 @@ struct sim_type{
     int dfa;
 }simple[100];
 
-int count, sim_c, my_color;
-FILE *patin = NULL;
-
 CDFA::CDFA()
-{}
+{
+    memset(this, 0, sizeof(CDFA));
+}
 
 int CDFA::change(int Color)
 {
@@ -67,26 +65,16 @@ int CDFA::change(int Color)
     return Color;
 }
 
-void CDFA::copy_board(char ori_board[][GRID_NUM], char temp_board[][GRID_NUM])
-{
-    int i, j;
-    for (i=0; i<GRID_NUM; i++){
-        for (j=0; j<GRID_NUM; j++){
-            temp_board[i][j] = ori_board[i][j];
-        }
-    }
-}
-
 int CDFA::check(move_t bestMove[], move_t now)
 {
     int i;
     for (i=0; i<count; i++){
-        if (now.positions[0].x == bestMove[i].positions[0].x && 
+        if (now.positions[0].x == bestMove[i].positions[0].x &&
             now.positions[1].x == bestMove[i].positions[1].x &&
             now.positions[0].y == bestMove[i].positions[0].y &&
             now.positions[1].y == bestMove[i].positions[1].y)
             return 0;
-        if (now.positions[0].x == bestMove[i].positions[1].x && 
+        if (now.positions[0].x == bestMove[i].positions[1].x &&
             now.positions[1].x == bestMove[i].positions[0].x &&
             now.positions[0].y == bestMove[i].positions[1].y &&
             now.positions[1].y == bestMove[i].positions[0].y)
@@ -99,7 +87,7 @@ void CDFA::new_match2(pos_t point, dfa_t *pdfa, move_t bestMove[], int direction
 {
     int p=0, j, step;
     for (step=0; step<2*pdfa->last_state; step++){
-        p = pdfa->states[p].next[change(m_board[point.x][point.y])];   
+        p = pdfa->states[p].next[change(m_board[point.x][point.y])];
         if (p == pdfa->last_state){
             for (j=0; j<pdfa->last_index; j++){
 
@@ -128,8 +116,8 @@ void CDFA::new_match(pos_t point, move_t bestMove[], int ori_direction)
     pos_t temp;
     for (i=0; i<m_dfa_index; i++){
         for (direction=0; direction<8; direction++){
-            if (direction == ori_direction || 
-                (transformation2[direction].x == -transformation2[ori_direction].x && 
+            if (direction == ori_direction ||
+                (transformation2[direction].x == -transformation2[ori_direction].x &&
                 transformation2[direction].y == -transformation2[ori_direction].y))
                 continue;
             temp.x = point.x - (transformation2[direction].x * (m_dfa_array[i].last_state-1));
@@ -152,12 +140,12 @@ void CDFA::addpoint(move_t bestMove[], pos_t point)
     int i, j, k;
     for (i=1; i<=19; i++){
         for (j=1; j<=19; j++){
-            if (m_board[i][j] == 0){ 
+            if (m_board[i][j] == 0){
                 for (k=0; k<8; k++){
-                    if (m_board[i+transformation2[k].x][j+transformation2[k].y] == 1 || 
+                    if (m_board[i+transformation2[k].x][j+transformation2[k].y] == 1 ||
                         m_board[i+transformation2[k].x][j+transformation2[k].y] == 2 ||
                         (i != 1 && i != 19 && j != 1 && j != 19 &&
-                        (m_board[i+2*transformation2[k].x][j+2*transformation2[k].y] == 1 || 
+                        (m_board[i+2*transformation2[k].x][j+2*transformation2[k].y] == 1 ||
                         m_board[i+2*transformation2[k].x][j+2*transformation2[k].y] == 2))){
                               break;
                     }
@@ -181,11 +169,10 @@ void CDFA::match2(pos_t point, dfa_t *pdfa, move_t bestMove[], int direction, in
     int p=0, j;
     pos_t temp, temp_bestMove;
     while (1){
-        p = pdfa->states[p].next[change(m_board[point.x][point.y])];     
+        p = pdfa->states[p].next[change(m_board[point.x][point.y])];
         if (p == pdfa->last_state){
             for (j=0; j<pdfa->last_index; j++){
-                /*若为某一棋型两子构成双破招,则添加招法*/
-                // If it
+                // If it forms two threats, add the move.
                 if ( pdfa->indexes[j].mode == 2 ){
                     if (pdfa->indexes[j].offset[0] != pdfa->indexes[j].offset[1]){
                         bestMove[count].positions[0].x = pdfa->indexes[j].offset[0] * (-transformation2[direction].x) + point.x;
@@ -206,9 +193,8 @@ void CDFA::match2(pos_t point, dfa_t *pdfa, move_t bestMove[], int direction, in
                         addpoint(bestMove, temp_bestMove);
 
                     }
-                }
-                /*若为添加一个棋子构成破招，则先记录下该棋子*/
-                else{
+                } else{
+                    // If it form one threat, record the point.
                     //Moves = (SMove *)realloc( bestMove, count * sizeof(Moves));
                     simple[sim_c].dfa = dfa_num;
                     simple[sim_c].x = pdfa->indexes[j].offset[0] * (-transformation2[direction].x) + point.x;
@@ -246,64 +232,66 @@ void CDFA::match2(pos_t point, dfa_t *pdfa, move_t bestMove[], int direction, in
     }
 }
 
-/*匹配函数，从每个起始点开始对一条直线上的棋子进行匹配*/
+// Match function, from the first point in a line.
 void CDFA::match(pos_t point, int direction, move_t * bestMove)
 {
     int i;
-    pos_t temp;                /*起始点临时变量*/
-                /*招法临时变量,帮助扩充招法数组*/
+    pos_t temp;
     for (i=0; i<m_dfa_index; i++){
         temp = point;
-        /*匹配过程,根据确定状态自动机对字符串遍历*/
+        // Match according to DFA.
         match2(temp, &m_dfa_array[i], bestMove, direction, i);
     }
     return;
 }
 
-/*进入匹配主函数*/
-int CDFA::pattern_match(char ourColor, move_t bestMove[])
+int CDFA::pattern_match(char ourColor, move_t bestMove[], char board[][GRID_NUM])
 {
-    int i, j,  temp_count;
+    int i, j;
+    //int temp_count;
     pos_t point;
 
-    char temp_board[GRID_NUM][GRID_NUM];
+    //char temp_board[GRID_NUM][GRID_NUM];
 
+    m_board = board;
     my_color = 0;
     if ( ourColor == 1 )
         my_color = 1;
-    copy_board(m_board, temp_board);
+    //copy_board(m_board, temp_board);
 
-    /*从棋盘四个边界的72个棋子开始对棋盘的每条射线进行匹配*/
-    for (i=1; i<=19; i++){
-        /*上边界*/
+    count = 0;
+    sim_c = 0;
+    // Match from the four edges of the board.
+    for (i=1; i<=GRID_NUM-2; i++){
+        // Up side.
         point.x = 1;
         point.y = i;
         match(point, u_2_d, bestMove);
         match(point, lu_2_rd, bestMove);
         match(point, ru_2_ld, bestMove);
 
-        /*左边界*/
+        // Left side.
         point.x = i;
         point.y = 1;
         match(point, l_2_r, bestMove);
         match(point, lu_2_rd, bestMove);
         match(point, ld_2_ru, bestMove);
 
-        /*下边界*/
-        point.x = 19;
+        // Down side.
+        point.x = GRID_NUM-2;
         point.y = i;
         match(point, d_2_u, bestMove);
         match(point, ld_2_ru, bestMove);
         match(point, rd_2_lu, bestMove);
 
-        /*右边界*/
+        // Right side.
         point.x = i;
-        point.y = 19;
+        point.y = GRID_NUM-2;
         match(point, r_2_l, bestMove);
         match(point, ru_2_ld, bestMove);
         match(point, rd_2_lu, bestMove);
     }
-    /*若为双眠三则对两种模式组合添加招法*/
+    // Add moves.
     for (j=0; j<sim_c; j++){
         for (i=j+1; i<sim_c; i++){
             bestMove[count].positions[0].x = simple[j].x;
@@ -321,17 +309,12 @@ int CDFA::pattern_match(char ourColor, move_t bestMove[])
         }
     }
     //kill_dfa();
-    temp_count = count;
-    count = 0;
-    sim_c = 0;
-    copy_board(temp_board, m_board);
-    return temp_count;
+    //temp_count = count;
+    //copy_board(temp_board, m_board);
+    return count;
 }
 
-//原来 create_dfa.cpp 中的内容
-
-
-/*字符预定义函数,将模式中相应字符转化成棋盘的表示方法*/
+// Change the pattern representation.
 int CDFA::find(char temp)
 {
     if ( strchr("*", temp) )
@@ -345,8 +328,9 @@ int CDFA::find(char temp)
     return 0;
 }
 
-/*自动机构建函数,对每个模式用枚举的方法构建自动机,关联所有状态*/
-/* For example:
+/*
+ * Create the pattern from string.
+ * For example:
  * create_dfa(pdfa, "OOX.")
  * gives:
  *
@@ -358,26 +342,25 @@ bool CDFA::dfa_create(dfa_t *pdfa, char str[])
     int i, j, k, l, temp, new_state=0, str_num;
     int x, y, num, mode;
 
-    /*模式字符串存为自动机名*/
+    // The pattern name.
     strcpy(pdfa->name, str);
 
-    /*遍历模式字符串,生成状态*/
+    // Create the pattern from the string.
     for (i=0; str[i]!='\0' && strchr("$#+-|OoXx.?,!a*", *str); i++){
         memset(pdfa->states[new_state].next, 0, 4 * sizeof(int));
         str_num = find(str[i]);
         pdfa->states[new_state].next[str_num] = new_state + 1;
         pdfa->states[new_state+1].att = str_num;
 
-        /*对每种不符合继续推进状态的情况构建跳转,连接到前部分状态*/
+        // Create skip table for states.
         for (l=0; l<4; l++){
             if (l == str_num)
                 continue;
             for (j=new_state; j>=0; j--){
 
-                /*遇到下一步未匹配的状态*/
+                // Next no matching state.
                 if (pdfa->states[j].att == l){
                     temp = j;
-                    /*遍历至自动机开始处,若匹配则建立状态跳转*/
                     for (k=1; pdfa->states[j-k].att == pdfa->states[new_state-k+1].att && j-k>=0; k++){
                         if (pdfa->states[j-k].att == str_num)
                             temp = j-k;
@@ -393,25 +376,25 @@ bool CDFA::dfa_create(dfa_t *pdfa, char str[])
         }
         new_state++;
 
-        /*当状态过多时，动态申请空间*/
+        // Realloc space if not enough.
         if (new_state >= pdfa->max_states)
             dfa_resize(pdfa, pdfa->max_states + Size, pdfa->max_indexes + Size);
     }
     pdfa->last_state = new_state;
 
-    /*读入招法,分类存放在该模式的招法数组中*/
-    fscanf(patin,"%d",&num);
+    // Read the pattern from file, store them to the array.
+    fscanf(m_partin,"%d",&num);
     for (i=0; i<num; i++){
-        fscanf(patin,"%d",&mode);
+        fscanf(m_partin,"%d",&mode);
         pdfa->indexes[i].mode = mode;
-        /*下一子的模式*/
+        // The pattern for the first point.
         if (mode == 1){
-            fscanf(patin,"%d",&x);
+            fscanf(m_partin,"%d",&x);
             pdfa->indexes[i].offset[0] = x;
         }
-        /*下二子的模式*/
+        // The pattern for the second point.
         else{
-            fscanf(patin,"%d %d",&x, &y);
+            fscanf(m_partin,"%d %d",&x, &y);
             for ( ; mode>0; mode--){
                 pdfa->indexes[i].offset[0] = x;
                 pdfa->indexes[i].offset[1] = y;
@@ -423,7 +406,7 @@ bool CDFA::dfa_create(dfa_t *pdfa, char str[])
     return 1;
 }
 
-/*自动机调整空间函数,当状态过多或招法过多时,可以动态调整空间存放状态及招法*/
+// Realloc the space for the patterns.
 void CDFA::dfa_resize(dfa_t *pdfa, int max_states, int max_indexes)
 {
   state_t *pBuf;
@@ -444,11 +427,9 @@ void CDFA::dfa_resize(dfa_t *pdfa, int max_states, int max_indexes)
   pdfa->max_indexes = max_indexes;
 }
 
-/*自动机初始化函数,从patterns.in文件中读出所有模式,对自动机初始化
- *第一行为模式总数
- *模式后有招法参数, "模式(char)" "招法数(int)" "类型(int)  招法偏移量(int，从后往前，从0开始)"
- */
-
+// Init the DFA, load the patterns from file.
+// The first line is the number of the patterns in the file,
+//   following the patterns.
 bool CDFA::dfa_init()
 {
     char input[20];
@@ -468,34 +449,33 @@ bool CDFA::dfa_init()
 
     strcat(path,"patterns.in");
 
-    patin = fopen(path,"r");
-    if (patin==NULL)
+    m_partin = fopen(path,"r");
+    if (m_partin==NULL)
     {
         printf("Error: Can't open patterns.in for dfa!");
         return false;
     }
     int max_index;
-    fscanf(patin,"%d",&max_index);
+    fscanf(m_partin,"%d",&max_index);
     m_dfa_index = 0;
-    /*遍历所有模式*/
+    // Traverse all the patterns.
     for (int i =0; i < max_index; i++){
-        fscanf(patin,"%s",input);
+        fscanf(m_partin,"%s",input);
         memset(&m_dfa_array[m_dfa_index], 0, sizeof(m_dfa_array[0]));
 
-        /*调用 resize_dfa 函数对模式,招法申请空间*/
+        // malloc the space for the pattern.
         dfa_resize(&m_dfa_array[m_dfa_index], Size, Size);
 
-        /*调用 create_dfa 函数构建自动机*/
+        // Create the DFA.
         if ( dfa_create(&m_dfa_array[m_dfa_index], input) )
             m_dfa_index++;
     }
-    fclose(patin);
+    fclose(m_partin);
+    // printf("XXXX %d\n", m_dfa_index);
     return true;
 }
 
-//原来 kill_dfa.cpp 文件中的内容
-
-/*对所有自动机申请空间进行释放*/
+// Free the space of the DFA.
 void CDFA::dfa_kill()
 {
     int i;

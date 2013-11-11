@@ -1,14 +1,14 @@
 /*
- * Copyright (c) 2008-2013 Hao Cui<>,
+ * Copyright (c) 2008-2013 Hao Cui<bit.cuihao@gmail.com>,
  *                         Liang Li<liliang010@gmail.com>,
- *                         Ruijian Wang<>,
- *                         Siran Lin<>.
+ *                         Ruijian Wang<wrjchn@gmail.com>,
+ *                         Siran Lin<37863581@qq.com>.
  *                         All rights reserved.
  *
  * This program is a free software; you can redistribute it and/or modify
  * it under the terms of the BSD license. See LICENSE.txt for details.
  *
- * 2013/11/01
+ * Date: 2013/11/01
  *
  */
 
@@ -51,7 +51,7 @@ class CVCFSearch {
         CVCFSearch();
         CVCFSearch(char* ptr_board[GRID_NUM], char* ptr_chess_type);
 
-        //判断是否需要VCF搜索；
+        // Check if VCFSearch is needed.
         bool vcf_judge(move_t * preMove);
 
         int init();
@@ -60,26 +60,21 @@ class CVCFSearch {
 
         void before_search(char board[][GRID_NUM], char color);
 
-        //VCF的实现；bestMove:返回最佳招法；preMove:传入上一步招法;
+        // VCFSearch implements.
         bool vcf_search(int depth,char ourColor,move_t * bestMove,move_t * preMove, int preNode, int prePos);
 
-        //反向VCF的实现；bestMove:返回最佳招法；preMove:传入上一步招法;
+        // Anti search for VCF.
         bool anti_vcf_search(int depth,char ourColor,move_t * bestMove,move_t * preMove, int preNode, int prePos);
 
-        //获取VCF招法；a_d:当前是进攻还是防守；canUse:传入可选择的点；moveList:返回招法序列和序列长度；
+    private:
+        // Get move list for VCF.
         int vcf_get_move_list( char ourColor,char a_d, pos_t * canUse, int n_Pos, move_t * moveList, move_t* pretMove);
 
-    private:
-        //判断是否结束；ourColor:当前棋的颜色；preMove:传入上一步的棋文件名；
-        //bool IsWin(char ourColor, SMove * preMove);
-
-        //判断该走法是否具有威胁
+        // Check the move if thread.
         int is_attack(char board[][GRID_NUM],char Color, move_t * Move);
 
-        //判断该走法是否构成活四
+        // Check the move can form a connected four.
         int is_dlb_attack(char board[][GRID_NUM],char Color, move_t * Move);
-        void vcf_make_move(char Color, move_t * move);            //下棋
-        void vcf_unmake_move(char Color, move_t * move);        //撤消招法
         int vcf_hash_check(HashNode node);
         unsigned long vcf_hash_board(char board[GRID_NUM][GRID_NUM]);
 
@@ -102,7 +97,7 @@ class CVCFSearch {
         char                m_org_board[GRID_NUM][GRID_NUM];
         ListNode            m_list_node[10000];
         move_t              m_tmp_move_list[10000];
-        move_t              m_vcf_move_list[VCFDEPTH+1][10000];                        //生成的招法序列
+        move_t              m_vcf_move_list[VCFDEPTH+1][10000];                         // Generated move list.
         std::vector<int>    m_hash_map[VCFDEPTH+1][HASHSIZE];
         HashNode            m_hash_que[1000000];
 
@@ -110,8 +105,8 @@ class CVCFSearch {
         int                 m_vcf_total_node;
         int                 m_vcf_now_pos;
         int                 m_dy[4];
-        int                 m_dx[4];        //定义方向数组
-        char                m_vcf_use[GRID_NUM][GRID_NUM][4];                    //评价标记数组
+        int                 m_dx[4];                                                    // Directions.
+        char                m_vcf_use[GRID_NUM][GRID_NUM][4];                           // Can be used position in the board.
         char                m_vcf_mark[GRID_NUM][GRID_NUM];
 
 };

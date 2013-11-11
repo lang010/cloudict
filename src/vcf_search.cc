@@ -1,14 +1,14 @@
 /*
- * Copyright (c) 2008-2013 Hao Cui<>,
+ * Copyright (c) 2008-2013 Hao Cui<bit.cuihao@gmail.com>,
  *                         Liang Li<liliang010@gmail.com>,
- *                         Ruijian Wang<>,
- *                         Siran Lin<>.
+ *                         Ruijian Wang<wrjchn@gmail.com>,
+ *                         Siran Lin<37863581@qq.com>.
  *                         All rights reserved.
  *
  * This program is a free software; you can redistribute it and/or modify
  * it under the terms of the BSD license. See LICENSE.txt for details.
  *
- * 2013/11/01
+ * Date: 2013/11/01
  *
  */
 
@@ -26,7 +26,7 @@ CVCFSearch::CVCFSearch() {
     m_dy[2] = -1;
     m_dy[3] = -1;
     // m_dy[4]={0,-1,-1,-1};
-    // m_dx[4]={-1,-1,0,1};        //定义方向数组
+    // m_dx[4]={-1,-1,0,1};        // Directions.
 }
 
 int CVCFSearch::init() {
@@ -53,9 +53,9 @@ bool CVCFSearch::vcf_judge(move_t * preMove)
     return false;
 }
 
-int CVCFSearch::is_attack(char board[GRID_NUM][GRID_NUM],char Color, move_t * Move)            //判断该走法是否具有威胁
+int CVCFSearch::is_attack(char board[GRID_NUM][GRID_NUM],char Color, move_t * Move)
 {
-    int x, y, newx, newy;        
+    int x, y, newx, newy;
     int count;
     int i, d, j;
     char tmpboard[GRID_NUM][GRID_NUM];
@@ -63,41 +63,39 @@ int CVCFSearch::is_attack(char board[GRID_NUM][GRID_NUM],char Color, move_t * Mo
     int max, min, ans=0;
 
     ans=is_dlb_attack(board,Color,Move);
-    if (ans>2)    //3个以上威胁
+    if (ans>2)                                      // More than two threats.
     {
         return ans;
     }
 
-    //memset(use,0,sizeof(use));                    //清空所有评价标志
-    memcpy(tmpboard,board,sizeof(tmpboard));    //创建临时棋盘
+    memcpy(tmpboard,board,sizeof(tmpboard));
     memcpy(tmpuse,m_vcf_use,sizeof(tmpuse));
 
     for ( i = 0; i <= 1; i++ )
     {
-        x = Move->positions[i].x;            //前一招法两点的坐标
+        x = Move->positions[i].x;                   // Pre move.
         y = Move->positions[i].y;
-        for ( d = 0; d < 4; d++  )            //对四个方向进行分析
+        for ( d = 0; d < 4; d++  )                  // For four directions.
         {
-            //每个方向找出我方的区域
+            // Get our zones in each direction.
             newx = x;
             newy = y;
             for ( j = 1; j < 6 ; j++ )
             {
                 newx += m_dx[d];
                 newy += m_dy[d];
-                if ( tmpboard[newx][newy]!=BORDER && tmpboard[newx][newy] != (Color^3) ) //如果该点不是对方棋子并且未评价过，继续
+                if ( tmpboard[newx][newy]!=BORDER && tmpboard[newx][newy] != (Color^3) )
                 {
                     if (tmpboard[newx][newy]==NOSTONE && m_vcf_mark[newx][newy])
                     {
                         break;
                     }
-                } 
-                else    //越出棋盘或有对方棋子退出
+                } else
                 {
                     break;
                 }
             }
-            max = j - 1;    //最大点
+            max = j - 1;    // Max point.
 
             newx = x;
             newy = y;
@@ -105,25 +103,24 @@ int CVCFSearch::is_attack(char board[GRID_NUM][GRID_NUM],char Color, move_t * Mo
             {
                 newx -= m_dx[d];
                 newy -= m_dy[d];
-                if ( tmpboard[newx][newy]!=BORDER && tmpboard[newx][newy] != (Color^3) ) //如果该点不是对方棋子并且未评价过，继续
+                if ( tmpboard[newx][newy]!=BORDER && tmpboard[newx][newy] != (Color^3) )
                 {
                     if (tmpboard[newx][newy]==NOSTONE&& m_vcf_mark[newx][newy])
                     {
                         break;
                     }
-                } 
-                else    //越出棋盘或有对方棋子退出    
+                } else
                 {
                     break;
                 }
             }
-            min = 1 - j;    //最小点
+            min = 1 - j;
 
-            if ( max - min + 1 < 6 )    //区域范围小于6
+            if ( max - min + 1 < 6 )    // Less than six.
             {
                 continue;
             }
-            j = max - 5;            //计算连续6个点有几个我方棋子
+            j = max - 5;                // Calculate how many points are ours, in the connected six.
             newx = x + m_dx[d] * j;
             newy = y + m_dy[d] * j;
             count=0;
@@ -139,7 +136,7 @@ int CVCFSearch::is_attack(char board[GRID_NUM][GRID_NUM],char Color, move_t * Mo
                 newy += m_dy[d];
             }
 
-            if ( count >= 4 )        //如果出现4个以上我方棋子，形成一威胁
+            if ( count >= 4 )           // One threat formed.
             {
                 ans++;
                 for (j=0;j<6;j++)
@@ -152,7 +149,7 @@ int CVCFSearch::is_attack(char board[GRID_NUM][GRID_NUM],char Color, move_t * Mo
                 continue;
             }
 
-            j = max - 6;            //6个子的区域不断移动
+            j = max - 6;                // Next connected six points.
             newx = x + m_dx[d] * j;
             newy = y + m_dy[d] * j;
             for (; j >= min; j--)
@@ -204,7 +201,7 @@ int CVCFSearch::is_attack(char board[GRID_NUM][GRID_NUM],char Color, move_t * Mo
 
 int CVCFSearch::is_dlb_attack(char board[][GRID_NUM],char Color, move_t * Move)
 {
-    int x, y, newx, newy;        
+    int x, y, newx, newy;
     int count;
     int i, d, j;
     char tmpboard[GRID_NUM][GRID_NUM];
@@ -212,24 +209,24 @@ int CVCFSearch::is_dlb_attack(char board[][GRID_NUM],char Color, move_t * Move)
 
     memset(m_vcf_use,0,sizeof(m_vcf_use));
     memset(m_vcf_mark,0,sizeof(m_vcf_mark));
-    memcpy(tmpboard,board,sizeof(tmpboard));    //创建临时棋盘
+    memcpy(tmpboard,board,sizeof(tmpboard));        // Create a tmp board.
 
     for ( i = 0; i <= 1; i++ )
     {
-        x = Move->positions[i].x;            //前一招法两点的坐标
+        x = Move->positions[i].x;                   // Pre move.
         y = Move->positions[i].y;
-        for ( d = 0; d < 4; d++  )            //对四个方向进行分析
+        for ( d = 0; d < 4; d++  )                  // For four direction.
         {
-            count = 1;                        //每个方向找出我方连续点的个数
+            count = 1;                              // Connected points.
             for ( j = 1; count < 6 ; j++ )
             {
                 newx = x + m_dx[d] * j;
                 newy = y + m_dy[d] * j;
-                if ( tmpboard[newx][newy] == Color) //连续
+                if ( tmpboard[newx][newy] == Color) // Connected.
                 {
                     count++;
-                } 
-                else        //不连续退出
+                }
+                else                                // Not connected, exit.
                 {
                     break;
                 }
@@ -239,17 +236,17 @@ int CVCFSearch::is_dlb_attack(char board[][GRID_NUM],char Color, move_t * Move)
             {
                 newx = x - m_dx[d] * j;
                 newy = y - m_dy[d] * j;
-                if ( tmpboard[newx][newy] == Color) //连续
+                if ( tmpboard[newx][newy] == Color) // Connected.
                 {
                     count++;
-                } 
-                else        //不连续退出
+                }
+                else                                // Not connected, exit.
                 {
                     break;
                 }
             }
             min = - j;
-            if ( count >= 6 )    //六连
+            if ( count >= 6 )                       // Connected six points.
             {
                 return 100;
             }
@@ -259,15 +256,15 @@ int CVCFSearch::is_dlb_attack(char board[][GRID_NUM],char Color, move_t * Move)
                 continue;
             }
 
-            //5连或4连
+            // Connected five or four points.
             int rightx = x + m_dx[d] * max;
             int righty = y + m_dy[d] * max;
             int leftx,lefty;
-            if ( tmpboard[rightx][righty] == NOSTONE)//一方有气
+            if (tmpboard[rightx][righty] == NOSTONE) // NOSTONE.
             {
                 leftx = x + m_dx[d] * min;
                 lefty = y + m_dy[d] * min;
-                if ( tmpboard[leftx][lefty] == NOSTONE)//另一方有气
+                if ( tmpboard[leftx][lefty] == NOSTONE)
                 {
                     if (count==4&&(tmpboard[leftx-m_dx[d]][lefty-m_dy[d]]==BORDER||tmpboard[leftx-m_dx[d]][lefty-m_dy[d]]==(Color^3))
                         ||(tmpboard[rightx+m_dx[d]][righty+m_dy[d]]==BORDER||tmpboard[rightx+m_dx[d]][righty+m_dy[d]]==(Color^3)))
@@ -298,7 +295,7 @@ int CVCFSearch::is_dlb_attack(char board[][GRID_NUM],char Color, move_t * Move)
 
 int CVCFSearch::is_three(char position[GRID_NUM][GRID_NUM],char Color, pos_t * Pos)
 {
-    int x, y, newx, newy;        
+    int x, y, newx, newy;
     int count;
     int  d, j;
     int min, max;
@@ -308,18 +305,18 @@ int CVCFSearch::is_three(char position[GRID_NUM][GRID_NUM],char Color, pos_t * P
 
     x=Pos->x;
     y=Pos->y;
-    for ( d = 0; d < 4; d++  )            //对四个方向进行分析
+    for ( d = 0; d < 4; d++  )            // Four direction.
     {
-        count = 1;                        //每个方向找出我方连续的区域
+        count = 1;
         for ( j = 1; j < 6 ; j++ )
         {
             newx = x + m_dx[d] * j;
             newy = y + m_dy[d] * j;
-            if ( tmpboard[newx][newy] == Color ) //连续
-            {        
+            if ( tmpboard[newx][newy] == Color )
+            {
                 count++;
-            } 
-            else if(tmpboard[newx][newy] != NOSTONE)        //不连续退出
+            }
+            else if(tmpboard[newx][newy] != NOSTONE)
             {
                 break;
             }
@@ -329,18 +326,18 @@ int CVCFSearch::is_three(char position[GRID_NUM][GRID_NUM],char Color, pos_t * P
         {
             newx = x - m_dx[d] * j;
             newy = y - m_dy[d] * j;
-            if ( tmpboard[newx][newy] == Color) //连续
+            if ( tmpboard[newx][newy] == Color)             // Connected.
             {
                 count++;
-            } 
-            else if(tmpboard[newx][newy] != NOSTONE)        //不连续退出
+            }
+            else if(tmpboard[newx][newy] != NOSTONE)        // Not Connected, exit.
             {
                 break;
             }
         }
         min = 1 - j;
 
-        if ( max - min + 1 < 6 )    //区域范围小于6
+        if ( max - min + 1 < 6 )                            // Less than six.
         {
             continue;
         }
@@ -348,7 +345,7 @@ int CVCFSearch::is_three(char position[GRID_NUM][GRID_NUM],char Color, pos_t * P
         {
             continue;
         }
-        j = max - 5;            //计算连续6个点有几个我方棋子
+        j = max - 5;                                        // Calculate how many points of ours.
         newx = x + m_dx[d] * j;
         newy = y + m_dy[d] * j;
         count=0;
@@ -362,12 +359,12 @@ int CVCFSearch::is_three(char position[GRID_NUM][GRID_NUM],char Color, pos_t * P
             newy += m_dy[d];
         }
 
-        if ( count >= 3 )        //如果出现3个以上我方棋子
+        if ( count >= 3 )                                   // More than three.
         {
             return 1;
         }
 
-        j = max - 6;            //6个子的区域不断移动
+        j = max - 6;                                        // Move to next zone.
         newx = x + m_dx[d] * j;
         newy = y + m_dy[d] * j;
         for (; j >= min; j--)
@@ -388,123 +385,25 @@ int CVCFSearch::is_three(char position[GRID_NUM][GRID_NUM],char Color, pos_t * P
             newx-=m_dx[d];
             newy-=m_dy[d];
         }
-    }    
+    }
     return 0;
 }
-
-
-void CVCFSearch::vcf_make_move(char Color, move_t * move)            //下棋
-{
-    m_board[move->positions[0].x][move->positions[0].y]=Color;
-    m_board[move->positions[1].x][move->positions[1].y]=Color;
-}
-void CVCFSearch::vcf_unmake_move(char Color, move_t * move)        //撤消招法
-{
-    m_board[move->positions[0].x][move->positions[0].y]=NOSTONE;
-    m_board[move->positions[1].x][move->positions[1].y]=NOSTONE;
-}
-
 
 int CVCFSearch::vcf_get_move_list( char ourColor,char a_d, pos_t * canUse, int n_Pos, move_t * moveList, move_t * preMove)
 {
     int n_MoveList=0, Count=0;
     int i, j, d, max, min;
 
-    int x, y, newx, newy;    
+    int x, y, newx, newy;
 
 
     char tmpboard[GRID_NUM][GRID_NUM];
-    memcpy(tmpboard,m_board,sizeof(tmpboard));    //创建临时棋盘
+    memcpy(tmpboard,m_board,sizeof(tmpboard));              // Create a tmp board.
 
-    if (a_d==1)//进攻
+    if (a_d==1)                                             // Attack.
     {
-        //我
-        //SMove tmpMove;
-        //for ( i=0;i<n_Pos;i++)
-        //{
-        //    tmpboard[canUse[i].x][canUse[i].y]=ourColor;
-        //    tmpMove.StonePos[0]=canUse[i];
-        //    
-        //    if (isThree(tmpboard,ourColor,canUse+i)==0)
-        //    {
-        //        tmpboard[canUse[i].x][canUse[i].y]=NOSTONE;
-        //        continue;
-        //    }
-        //    
-        //    for (j=i+1;j<n_Pos;j++)            //根据当前可走点生成一些招法
-        //    {
-        //        tmpboard[canUse[j].x][canUse[j].y]=ourColor;
-        //        tmpMove.StonePos[1]=canUse[j];        //创建临时招法并下子
-        //        Count=IsAttack(tmpboard,ourColor,&tmpMove);    //返回临时招法的威胁度
-        //        tmpboard[canUse[j].x][canUse[j].y]=NOSTONE;    //恢复棋盘
-
-        //        if (Count>=50)
-        //        {
-        //            moveList[0].StonePos[0]=canUse[i];
-        //            moveList[0].StonePos[1]=canUse[j];
-        //            moveList[0].Score=Count;
-        //            return 1;
-        //        }
-
-        //        if (Count>2)
-        //        {
-        //            moveList[n_MoveList]=moveList[0];
-        //            moveList[0].StonePos[0]=canUse[i];
-        //            moveList[0].StonePos[1]=canUse[j];
-        //            moveList[0].Score=Count;
-        //            n_MoveList++;
-        //            
-        //        }
-
-        //        if (Count==2)        //如果双威胁添加招法
-        //        {
-        //            moveList[n_MoveList].StonePos[0]=canUse[i];
-        //            moveList[n_MoveList].StonePos[1]=canUse[j];
-        //            moveList[n_MoveList].Score=Count;
-        //            n_MoveList++;
-        //        } 
-
-        //    }
-        //    tmpboard[canUse[i].x][canUse[i].y]=NOSTONE;
-
-        //}
-
-
-        //崔皓
-        /*int n_first,n_second;
-        int MovePos[361],MovePos2[361];
-        n_first=GetVCFMoveList(ourColor,1,canUse,n_Pos,MovePos,preMove,1);
-        for (i=0;i<n_first;i++)
-        {
-        x=canUse[MovePos[i]].x;
-        y=canUse[MovePos[i]].y;
-        canUse[MovePos[i]]=canUse[n_Pos-1];
-        board[x][y]=ourColor;
-        n_second=GetVCFMoveList(ourColor,1,canUse,n_Pos-1,MovePos2,preMove,2);
-        for (j=0;j<n_second;j++)
-        {
-        if (MovePos2[j]<MovePos[i])
-        {
-        continue;
-        }
-        moveList[n_MoveList].StonePos[0].x=x;
-        moveList[n_MoveList].StonePos[0].y=y;
-        moveList[n_MoveList].StonePos[1]=canUse[MovePos2[j]];
-        board[canUse[MovePos2[j]].x][canUse[MovePos2[j]].y]=ourColor;
-        if (IsAttack(board,ourColor,moveList+n_MoveList)>=2)
-        {
-        n_MoveList++;
-        }
-        board[canUse[MovePos2[j]].x][canUse[MovePos2[j]].y]=NOSTONE;
-        }
-        board[x][y]=NOSTONE;
-        canUse[n_Pos-1]=canUse[MovePos[i]];
-        canUse[MovePos[i]].x=x;
-        canUse[MovePos[i]].y=y;
-        }*/
-
-        //林思然
-        n_MoveList=m_dfa.pattern_match(ourColor,moveList);
+        // Siran Lin's
+        n_MoveList=m_dfa.pattern_match(ourColor,moveList, tmpboard);
         for (i=0,j=0;i<n_MoveList;i++)
         {
             move_t tmpMove, orgMove;
@@ -556,9 +455,9 @@ int CVCFSearch::vcf_get_move_list( char ourColor,char a_d, pos_t * canUse, int n
             }
         }
         n_MoveList=j;
-        
-    } 
-    else        //防守
+
+    }
+    else                            // Defence.
     {
         if (is_attack(tmpboard,ourColor^3,preMove)!=2)
         {
@@ -571,12 +470,12 @@ int CVCFSearch::vcf_get_move_list( char ourColor,char a_d, pos_t * canUse, int n
         int dir=0;
         for ( i = 0; i <= 1; i++ )
         {
-            x = preMove->positions[i].x;            //前一招法两点的坐标
+            x = preMove->positions[i].x;                        // Pre move.
             y = preMove->positions[i].y;
-            for ( d = 0; d < 4; d++  )            //对四个方向进行分析
+            for ( d = 0; d < 4; d++  )                          // Four directions.
             {
 
-                if (!m_vcf_use[x][y][d])        //如果未评价过退出
+                if (!m_vcf_use[x][y][d])                        // Can't be used, skip.
                 {
                     continue;
                 }
@@ -584,14 +483,14 @@ int CVCFSearch::vcf_get_move_list( char ourColor,char a_d, pos_t * canUse, int n
                 {
                     break;
                 }
-                //找出当前方向上已评价过的连续的点
+                // Find the scored points in current direction.
                 int n_Nostone=0;
                 Count=0;
                 for ( j = 1; ; j++ )
                 {
                     newx = x + m_dx[d] * j;
                     newy = y + m_dy[d] * j;
-                    if ( m_vcf_use[newx][newy][d] ) //连续并评价过
+                    if ( m_vcf_use[newx][newy][d] )             // Can be used points.
                     {
                         if (tmpboard[newx][newy]==NOSTONE)
                         {
@@ -607,8 +506,8 @@ int CVCFSearch::vcf_get_move_list( char ourColor,char a_d, pos_t * canUse, int n
                             }
                         }
 
-                    } 
-                    else        //退出
+                    }
+                    else
                     {
                         break;
                     }
@@ -616,17 +515,17 @@ int CVCFSearch::vcf_get_move_list( char ourColor,char a_d, pos_t * canUse, int n
                 newx-=m_dx[d];
                 newy-=m_dy[d];
                 if (tmpboard[newx][newy]==NOSTONE)//&& tmpboard[newx+dx[d]][newy+dy[d]]!=BORDER
-                    //&&tmpboard[newx+dx[d]][newy+dy[d]]!=ourColor)//如果边缘的点未落子
+                    //&&tmpboard[newx+dx[d]][newy+dy[d]]!=ourColor)
                 {
                     Count++;
                 }
-                max=j-1;//保存最大点
+                max=j-1;                                // Max point.
 
                 for ( j = 1; ; j++ )
                 {
                     newx = x - m_dx[d] * j;
                     newy = y - m_dy[d] * j;
-                    if ( m_vcf_use[newx][newy][d] ) //连续并评价过
+                    if ( m_vcf_use[newx][newy][d] )     // Can be used.
                     {
                         if (tmpboard[newx][newy]==NOSTONE)
                         {
@@ -641,8 +540,8 @@ int CVCFSearch::vcf_get_move_list( char ourColor,char a_d, pos_t * canUse, int n
                                 break;
                             }
                         }
-                    } 
-                    else        //退出
+                    }
+                    else        // Exit.
                     {
                         break;
                     }
@@ -651,11 +550,11 @@ int CVCFSearch::vcf_get_move_list( char ourColor,char a_d, pos_t * canUse, int n
                 newx+=m_dx[d];
                 newy+=m_dy[d];
                 if ( tmpboard[newx][newy]==NOSTONE)// && tmpboard[newx-dx[d]][newy-dy[d]]!=BORDER
-                    //&&tmpboard[newx-dx[d]][newy-dy[d]]!=ourColor)//如果边缘的点未落子
+                    //&&tmpboard[newx-dx[d]][newy-dy[d]]!=ourColor)
                 {
                     Count++;
                 }
-                min=1-j;//保存最小点
+                min=1-j;                                // Min points.
 
                 if (max-min+1<6)
                 {
@@ -665,7 +564,7 @@ int CVCFSearch::vcf_get_move_list( char ourColor,char a_d, pos_t * canUse, int n
                 dir++;
 
 
-                if (Count==2&&n_Nostone==2)//如果边缘两个点是空子，即双威胁
+                if (Count==2&&n_Nostone==2)             // two threats.
                 {
                     if (max-min==5)
                     {
@@ -719,7 +618,7 @@ int CVCFSearch::vcf_get_move_list( char ourColor,char a_d, pos_t * canUse, int n
         n_MoveList=0;
         for (i=0;i<nPos[0];i++)
         {
-            for (j=0;j<nPos[1];j++)  //招找到的点生成招法
+            for (j=0;j<nPos[1];j++)                     // Generate the moves.
             {
                 if (Pos[0][i].x!=Pos[1][j].x||Pos[0][i].y!=Pos[1][j].y)
                 {
@@ -756,7 +655,7 @@ static int cmp(const void * a, const void * b)
     {
         return bb.score-aa.score;
     }
-    
+
     return aa.dist-bb.dist;
 
 }
@@ -773,7 +672,7 @@ void CVCFSearch::sort(move_t * moveList, int n_moveList, move_t * preMove)
         m_list_node[i].score= (int)moveList[i].score;
         m_list_node[i].pos=i;
     }
-    
+
     qsort(m_list_node,n_moveList,sizeof(ListNode),cmp);
     for (i=0;i<n_moveList;i++)
     {
@@ -847,10 +746,10 @@ int CVCFSearch::vcf_hash_check(HashNode node)
 
 bool CVCFSearch::anti_vcf_search(int depth,char ourColor,move_t * bestMove,move_t * preMove, int preNode, int prePos)
 {
-    int Color = ourColor;            //当前轮到谁下子
+    int Color = ourColor;
     int i,j, t;
     int n_pos=0, n_moveList;
-    pos_t canUse[GRID_NUM*GRID_NUM];                //可落子的点
+    pos_t canUse[GRID_NUM*GRID_NUM];                        // Points that can be used.
     move_t * moveList = m_vcf_move_list[depth];
     bool flag;
     int NodeID;
@@ -882,17 +781,14 @@ bool CVCFSearch::anti_vcf_search(int depth,char ourColor,move_t * bestMove,move_
         return m_hash_que[t].res;
     }
 
-
-    //return false;
-
-    if (depth>=ANTIVCFDEPTH)   //超过预定的层数，VCF失败
+    if (depth>=ANTIVCFDEPTH)                        // Fail, if exceed the depth limitation.
     {
         m_hash_que[CurPos].res=false;
         m_hash_map[depth][m_hash_que[CurPos].hash%HASHSIZE].push_back(CurPos);
         return false;
     }
 
-    if (is_win_by_premove(m_board, preMove)) //如果有一方胜利，退出当前搜索
+    if (is_win_by_premove(m_board, preMove))        // If won by some one, return.
     {
         m_hash_que[CurPos].res=(Color!=(m_chess_type));
         m_hash_map[depth][m_hash_que[CurPos].hash%HASHSIZE].push_back(CurPos);
@@ -901,7 +797,7 @@ bool CVCFSearch::anti_vcf_search(int depth,char ourColor,move_t * bestMove,move_
 
     if (Color==((m_chess_type)^3) && is_attack(m_board,Color^3,preMove))
     {
-        n_moveList=vcf_get_move_list(Color,1,canUse,n_pos,moveList, preMove); //生成招法
+        n_moveList=vcf_get_move_list(Color,1,canUse,n_pos,moveList, preMove);   // Get the move list.
 
         sort(moveList,n_moveList,preMove);
 
@@ -921,16 +817,16 @@ bool CVCFSearch::anti_vcf_search(int depth,char ourColor,move_t * bestMove,move_
 
                 return true;
             }
-            vcf_make_move(Color,moveList+i);    //下子
+            make_move(m_board,moveList+i, Color);
             if (is_attack(m_board,Color^3,preMove))
             {
-                vcf_unmake_move(Color,moveList+i);    //撤子
+                unmake_move(m_board, moveList+i);
                 continue;
             }
             NodeID=++m_vcf_total_node;
             flag = anti_vcf_search(depth+1,ourColor^3,bestMove,moveList+i,NodeID,CurPos); //返回下一步VCF的结果
-            vcf_unmake_move(Color,moveList+i);    //撤子
-            if (flag)    //如果成功，当前VCF成功并返回
+            unmake_move(m_board, moveList+i);
+            if (flag)                                       // If VCF win, return.
             {
                 if (depth==0)
                 {
@@ -947,7 +843,7 @@ bool CVCFSearch::anti_vcf_search(int depth,char ourColor,move_t * bestMove,move_
         }
         m_hash_que[CurPos].res=false;
         m_hash_map[depth][m_hash_que[CurPos].hash%HASHSIZE].push_back(CurPos);
-        return false;        //如果所有招法无法成功则VCF失败
+        return false;                                       // Failed.
     }
 
     if (Color==(m_chess_type)&& is_attack(m_board,Color^3,preMove)>2)
@@ -957,23 +853,21 @@ bool CVCFSearch::anti_vcf_search(int depth,char ourColor,move_t * bestMove,move_
         return true;
     }
 
-        
+
 
     if ( Color==((m_chess_type)^3) )
     {
-        //n_moveList=PatternMatch(ourColor,moveList);
-
         n_moveList=vcf_get_move_list(Color,1,canUse,n_pos,moveList, preMove); //生成招法
 
         sort(moveList,n_moveList,preMove);
 
         for (i=0;i<n_moveList;i++)
-        {    
+        {
             NodeID=++m_vcf_total_node;
-            vcf_make_move(Color,moveList+i);    //下子
-            flag = anti_vcf_search(depth+1,ourColor^3,bestMove,moveList+i,NodeID,CurPos); //返回下一步VCF的结果
-            vcf_unmake_move(Color,moveList+i);    //撤子
-            if (flag)    //如果成功，当前VCF成功并返回
+            make_move(m_board, moveList+i, Color);
+            flag = anti_vcf_search(depth+1,ourColor^3,bestMove,moveList+i,NodeID,CurPos);
+            unmake_move(m_board, moveList+i);
+            if (flag)
             {
                 if (depth==0)
                 {
@@ -989,20 +883,20 @@ bool CVCFSearch::anti_vcf_search(int depth,char ourColor,move_t * bestMove,move_
         }
         m_hash_que[CurPos].res=false;
         m_hash_map[depth][m_hash_que[CurPos].hash%HASHSIZE].push_back(CurPos);
-        return false;        //如果所有招法无法成功则VCF失败
+        return false;
     }
     else
     {
 
-        n_moveList=vcf_get_move_list(Color,0,canUse,n_pos,moveList, preMove);//生成招法
+        n_moveList=vcf_get_move_list(Color,0,canUse,n_pos,moveList, preMove);
         j=m_vcf_total_node;
         for (i=0;i<n_moveList;i++)
         {
             NodeID=++m_vcf_total_node;
-            vcf_make_move(Color,moveList+i);//下子
-            flag = anti_vcf_search(depth+1,ourColor^3,bestMove,moveList+i,NodeID,CurPos);//返回下一步VCF的结果
-            vcf_unmake_move(Color,moveList+i);    //撤子
-            if ( !flag )//如果失败，当前VCF失败并返回
+            make_move(m_board, moveList+i, Color);
+            flag = anti_vcf_search(depth+1,ourColor^3,bestMove,moveList+i,NodeID,CurPos);
+            unmake_move(m_board, moveList+i);
+            if ( !flag )
             {
                 m_vcf_total_node=j;
                 m_hash_que[CurPos].res=false;
@@ -1013,22 +907,17 @@ bool CVCFSearch::anti_vcf_search(int depth,char ourColor,move_t * bestMove,move_
         }
         m_hash_que[CurPos].res=true;
         m_hash_map[depth][m_hash_que[CurPos].hash%HASHSIZE].push_back(CurPos);
-        return true;        //如果所有招法成功则VCF成功
+        return true;
     }
 }
 
-/*
-攻方只要有一种招法能使VCF成功则当前VCF成功，否则失败
-防方只要有一种招法能使VCF失败则当前VCF失败，否则成功
-
-*/
 bool CVCFSearch::vcf_search(int depth,char ourColor,move_t * bestMove,move_t * preMove, int preNode, int prePos)
 {
-    int Color = ourColor;            //当前轮到谁下子
+    int Color = ourColor;
     int i,j, t;
     int nRoundi0,nRoundi1,nRoundj0,nRoundj1;
     int n_pos=0, n_moveList;
-    pos_t canUse[GRID_NUM*GRID_NUM];                //可落子的点
+    pos_t canUse[GRID_NUM*GRID_NUM];                            // Points that can be used.
     move_t * moveList = m_vcf_move_list[depth];
     bool flag;
     int NodeID;
@@ -1055,7 +944,7 @@ bool CVCFSearch::vcf_search(int depth,char ourColor,move_t * bestMove,move_t * p
         }
         m_has_win=0;
     }
-    
+
     if (depth==0)
     {
         memcpy(m_org_board,tmpboard,sizeof(tmpboard));
@@ -1068,7 +957,7 @@ bool CVCFSearch::vcf_search(int depth,char ourColor,move_t * bestMove,move_t * p
         }
         m_vcf_total_node=0;
     }
-    
+
     m_hash_que[CurPos].move=*preMove;
     m_hash_que[CurPos].pre=prePos;
     m_hash_que[CurPos].hash=vcf_hash_board(tmpboard);
@@ -1079,10 +968,7 @@ bool CVCFSearch::vcf_search(int depth,char ourColor,move_t * bestMove,move_t * p
         return m_hash_que[t].res;
     }
 
-
-    //return false;
-
-    if (depth>=VCFDEPTH)   //超过预定的层数，VCF失败
+    if (depth>=VCFDEPTH)                            // Return if it exceed the depth.
     {
         m_hash_que[CurPos].res=false;
         m_hash_map[depth][m_hash_que[CurPos].hash%HASHSIZE].push_back(CurPos);
@@ -1096,7 +982,7 @@ bool CVCFSearch::vcf_search(int depth,char ourColor,move_t * bestMove,move_t * p
         return false;
     }
 
-    if (is_win_by_premove(m_board, preMove)) //如果有一方胜利，退出当前搜索
+    if (is_win_by_premove(m_board, preMove))        // Won by pre move.
     {
         m_hash_que[CurPos].res=(Color!=(m_chess_type));
         m_hash_map[depth][m_hash_que[CurPos].hash%HASHSIZE].push_back(CurPos);
@@ -1106,9 +992,7 @@ bool CVCFSearch::vcf_search(int depth,char ourColor,move_t * bestMove,move_t * p
     if (Color==(m_chess_type) && is_attack(m_board,Color^3,preMove))
     {
 
-        //找出棋盘上已落子的点向外招展两圈可下的点
-        //开始---------------------------------------------------------------
-
+        // Find the points that can be used.
         nRoundi0 = 19;
         nRoundj0 = 19;
         nRoundi1 = 1;
@@ -1139,6 +1023,7 @@ bool CVCFSearch::vcf_search(int depth,char ourColor,move_t * bestMove,move_t * p
                 }
             }
         }
+        // Exceed two points for edges.
         nRoundi0 -= 2;
         nRoundj0 -= 2;
         nRoundi1 += 2;
@@ -1174,14 +1059,12 @@ bool CVCFSearch::vcf_search(int depth,char ourColor,move_t * bestMove,move_t * p
             }
         }
 
-        //结束---------------------------------------------------------------
-
-        n_moveList=vcf_get_move_list(Color,1,canUse,n_pos,moveList, preMove); //生成招法
+        n_moveList=vcf_get_move_list(Color,1,canUse,n_pos,moveList, preMove);
 
         sort(moveList,n_moveList,preMove);
 
         for (i=0;i<n_moveList;i++)
-        {    
+        {
             if (moveList[i].score>=50)
             {
                 NodeID=++m_vcf_total_node;
@@ -1201,16 +1084,16 @@ bool CVCFSearch::vcf_search(int depth,char ourColor,move_t * bestMove,move_t * p
 
                 return true;
             }
-            vcf_make_move(Color,moveList+i);    //下子
+            make_move(m_board, moveList+i, Color);
             if (is_attack(m_board,Color^3,preMove))
             {
-                vcf_unmake_move(Color,moveList+i);    //撤子
+                unmake_move(m_board,moveList+i);
                 continue;
             }
             NodeID=++m_vcf_total_node;
-            flag = vcf_search(depth+1,ourColor^3,bestMove,moveList+i,NodeID,CurPos); //返回下一步VCF的结果
-            vcf_unmake_move(Color,moveList+i);    //撤子
-            if (flag)    //如果成功，当前VCF成功并返回
+            flag = vcf_search(depth+1,ourColor^3,bestMove,moveList+i,NodeID,CurPos); // Recursive search.
+            unmake_move(m_board,moveList+i);
+            if (flag)        // Win, return.
             {
                 if (depth==0)
                 {
@@ -1232,7 +1115,7 @@ bool CVCFSearch::vcf_search(int depth,char ourColor,move_t * bestMove,move_t * p
         }
         m_hash_que[CurPos].res=false;
         m_hash_map[depth][m_hash_que[CurPos].hash%HASHSIZE].push_back(CurPos);
-        return false;        //如果所有招法无法成功则VCF失败
+        return false;        // Failed.
     }
 
     if ((Color^3)==(m_chess_type)&& is_attack(m_board,Color^3,preMove)>2)
@@ -1244,9 +1127,6 @@ bool CVCFSearch::vcf_search(int depth,char ourColor,move_t * bestMove,move_t * p
 
     if (Color==(m_chess_type))
     {
-        //找出棋盘上已落子的点向外招展两圈可下的点
-        //开始---------------------------------------------------------------
-
         nRoundi0 = 19;
         nRoundj0 = 19;
         nRoundi1 = 1;
@@ -1312,24 +1192,21 @@ bool CVCFSearch::vcf_search(int depth,char ourColor,move_t * bestMove,move_t * p
             }
         }
 
-        //结束---------------------------------------------------------------
     }
 
     if ( Color==m_chess_type )
     {
-        //n_moveList=PatternMatch(ourColor,moveList);
-
-        n_moveList=vcf_get_move_list(Color,1,canUse,n_pos,moveList, preMove); //生成招法
+        n_moveList=vcf_get_move_list(Color,1,canUse,n_pos,moveList, preMove);
 
         sort(moveList,n_moveList,preMove);
 
         for (i=0;i<n_moveList;i++)
-        {    
+        {
             NodeID=++m_vcf_total_node;
-            vcf_make_move(Color,moveList+i);    //下子
-            flag = vcf_search(depth+1,ourColor^3,bestMove,moveList+i,NodeID,CurPos); //返回下一步VCF的结果
-            vcf_unmake_move(Color,moveList+i);    //撤子
-            if (flag)    //如果成功，当前VCF成功并返回
+            make_move(m_board, moveList+i, Color);
+            flag = vcf_search(depth+1,ourColor^3,bestMove,moveList+i,NodeID,CurPos);
+            unmake_move(m_board,moveList+i);
+            if (flag)
             {
                 if (depth==0)
                 {
@@ -1350,20 +1227,20 @@ bool CVCFSearch::vcf_search(int depth,char ourColor,move_t * bestMove,move_t * p
         }
         m_hash_que[CurPos].res=false;
         m_hash_map[depth][m_hash_que[CurPos].hash%HASHSIZE].push_back(CurPos);
-        return false;        //如果所有招法无法成功则VCF失败
+        return false;
     }
     else
     {
 
-        n_moveList=vcf_get_move_list(Color,0,canUse,n_pos,moveList, preMove);//生成招法
+        n_moveList=vcf_get_move_list(Color,0,canUse,n_pos,moveList, preMove);
         j=m_vcf_total_node;
         for (i=0;i<n_moveList;i++)
         {
             NodeID=++m_vcf_total_node;
-            vcf_make_move(Color,moveList+i);//下子
-            flag = vcf_search(depth+1,ourColor^3,bestMove,moveList+i,NodeID,CurPos);//返回下一步VCF的结果
-            vcf_unmake_move(Color,moveList+i);    //撤子
-            if ( !flag )//如果失败，当前VCF失败并返回
+            make_move(m_board, moveList+i, Color);
+            flag = vcf_search(depth+1,ourColor^3,bestMove,moveList+i,NodeID,CurPos);
+            unmake_move(m_board,moveList+i);
+            if ( !flag )
             {
                 m_vcf_total_node=j;
                 m_hash_que[CurPos].res=false;
@@ -1376,7 +1253,7 @@ bool CVCFSearch::vcf_search(int depth,char ourColor,move_t * bestMove,move_t * p
         }
         m_hash_que[CurPos].res=true;
         m_hash_map[depth][m_hash_que[CurPos].hash%HASHSIZE].push_back(CurPos);
-        return true;        //如果所有招法成功则VCF成功
+        return true;
     }
 }
 

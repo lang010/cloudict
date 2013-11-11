@@ -1,7 +1,7 @@
-Copyright (c) 2008-2013 Hao Cui<>,
+Copyright (c) 2008-2013 Hao Cui<bit.cuihao@gmail.com>,
                         Liang Li<liliang010@gmail.com>,
-                        Ruijian Wang<>,
-                        Siran Lin<>.
+                        Ruijian Wang<wrjchn@gmail.com>,
+                        Siran Lin<37863581@qq.com>.
                         All rights reserved.
 License: BSD-style
 

@@ -1,14 +1,14 @@
 /*
- * Copyright (c) 2008-2013 Hao Cui<>,
+ * Copyright (c) 2008-2013 Hao Cui<bit.cuihao@gmail.com>,
  *                         Liang Li<liliang010@gmail.com>,
- *                         Ruijian Wang<>,
- *                         Siran Lin<>.
+ *                         Ruijian Wang<wrjchn@gmail.com>,
+ *                         Siran Lin<37863581@qq.com>.
  *                         All rights reserved.
  *
  * This program is a free software; you can redistribute it and/or modify
  * it under the terms of the BSD license. See LICENSE.txt for details.
  *
- * 2013/11/01
+ * Date: 2013/11/01
  *
  */
 
@@ -16,6 +16,7 @@
 #define PATTERN_H
 
 #include "defines.h"
+#include <stdio.h>
 
 //Pattern
 typedef struct attrib
@@ -56,14 +57,13 @@ class CDFA {
         /* Attribute list. */
         bool dfa_init();
 
-        int pattern_match(char ourColor, move_t bestMove[]);
+        int pattern_match(char ourColor, move_t bestMove[], char board[][GRID_NUM]);
 
     private:
         bool dfa_create(dfa_t *pdfa, char str[]);
         void dfa_kill();
         void dfa_resize(dfa_t *pdfa, int max_states, int max_indexes);
         int change(int Color);
-        void copy_board(char ori_board[][21], char temp_board[][21]);
         int check(move_t bestMove[], move_t now);
         void new_match2(pos_t point, dfa_t *pdfa, move_t bestMove[], int direction);
         void new_match(pos_t point, move_t bestMove[], int ori_direction);
@@ -73,9 +73,12 @@ class CDFA {
         int find(char temp);
 
     private:
-        char    m_board[GRID_NUM][GRID_NUM];
+        char    (*m_board)[GRID_NUM];
         int     m_dfa_index;
         dfa_t   m_dfa_array[10000];
+
+        int     count, sim_c, my_color;
+        FILE    *m_partin;
 
 };
 

@@ -1,8 +1,8 @@
 /*
- * Copyright (c) 2008-2013 Hao Cui<bit.cuihao@gmail.com>,
- *                         Liang Li<liliang010@gmail.com>,
- *                         Ruijian Wang<wrjchn@gmail.com>,
- *                         Siran Lin<37863581@qq.com>.
+ * Copyright (c) 2008-2013 Hao Cui <Hao.Cui@Tufts.edu>,
+ *                         Liang Li <liliang010@gmail.com>,
+ *                         Ruijian Wang <jeoygin@gmail.com>,
+ *                         Siran Lin <linsiran@gmail.com>.
  *                         All rights reserved.
  *
  * This program is a free software; you can redistribute it and/or modify

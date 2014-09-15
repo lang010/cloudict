@@ -93,6 +93,10 @@ double CSearchEngine::alpha_beta_search(int depth,double alpha,double beta,char 
 
     for(int i = beg ; i< end ; i++)
     {
+        if (depth == m_alphabeta_depth) {
+	    printf("Searching %d/%d\n", i+1, end);
+	    fflush(stdout);
+        }
         m_board[moveList[i].positions[0].x][moveList[i].positions[0].y] = ourColor;
         m_board[moveList[i].positions[1].x][moveList[i].positions[1].y] = ourColor;
 

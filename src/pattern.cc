@@ -432,7 +432,7 @@ void CDFA::dfa_resize(dfa_t *pdfa, int max_states, int max_indexes)
 //   following the patterns.
 bool CDFA::dfa_init()
 {
-    char input[20];
+    char input[100];
 
     char path[500];
 

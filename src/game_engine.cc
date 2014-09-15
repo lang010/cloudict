@@ -32,6 +32,7 @@ int CGameEngine::init(char* name) {
     }
 
     m_alphabeta_depth = 6;
+    m_vcf = true;
 
     m_vcf_search.init(); // VCF engine init the dfa, only once when engine started.
     init_game();
@@ -58,6 +59,8 @@ void CGameEngine::on_help() {
             new black   - start a new game and set the engine to Black player.\n\
             new white   - start a new game and set it to White.\n\
             depth d     - set the alpha beta search depth, default is 6.\n\
+            vcf         - set vcf search.\n\
+            unvcf       - set none vcf search.\n\
             help        - print this help.\n", m_engine_name);
 }
 
@@ -75,7 +78,7 @@ int CGameEngine::run()
         if (strcmp(msg,"name") == 0)
         {
             //name
-            printf("%s\n", m_engine_name);
+            printf("name %s\n", m_engine_name);
             fflush(stdout);
             continue;
         } else
@@ -87,7 +90,11 @@ int CGameEngine::run()
         if (strcmp(msg, "print") == 0)
         {
             print_board(m_board, &m_best_move);
-        } else
+        } else if (strcmp(msg, "vcf") == 0) {
+	    m_vcf = true;
+	} else if (strcmp(msg, "unvcf") == 0) {
+	    m_vcf = false;
+	} else
         if (strncmp(msg,"black", 5) == 0)
         {
             // Set the position by black stone
@@ -113,6 +120,7 @@ int CGameEngine::run()
                 strcpy(msg, "move ");
                 move2msg(&m_best_move, &msg[5]);
                 printf("%s\n",msg);
+		fflush(stdout);
             }
             continue;
         } else
@@ -181,24 +189,26 @@ int CGameEngine::run()
 bool CGameEngine::search_a_move(char ourColor,move_t* bestMove)
 {
     double score = 0;
-    bool vcf = false;
+    clock_t start,end;
 
     // VCF Search first, for the position.
-    clock_t start,end;
-    start = clock();
-    m_vcf_search.before_search(m_board, m_chess_type);
-    vcf = m_vcf_search.vcf_search(0,ourColor,bestMove,bestMove,0,-1);
-    end = clock();
+    if (m_vcf) {
+        bool vcf = false;
+	start = clock();
+	m_vcf_search.before_search(m_board, m_chess_type);
+	vcf = m_vcf_search.vcf_search(0,ourColor,bestMove,bestMove,0,-1);
+	end = clock();
 
-    printf("VCF time : %.3lf\n", (double)(end - start)/CLOCKS_PER_SEC);
-    printf("VCF node : %d\n\n", m_vcf_search.m_vcf_node);
+	printf("VCF time : %.3lf\n", (double)(end - start)/CLOCKS_PER_SEC);
+	// Check if wins.
+	if (vcf) {
+	    printf("Win by VCF.\n");
+	    return true;
+	}
 
-    // Check if wins.
-    if (vcf)
-    {
-        printf ( " Win by VCF.\n");
-        return true;
+	printf("VCF node : %d\n\n", m_vcf_search.m_vcf_node);
     }
+
 
     // Alpha beta search continue, if VCF search failed.
     start = clock();

@@ -33,6 +33,7 @@ class CGameEngine {
         move_t              m_best_move;                        // The pre best move.
         int                 m_chess_type;                       // The engine's chess color, black or white.
         int                 m_alphabeta_depth;
+	bool                m_vcf;
 
         CSearchEngine       m_search_engine;
         CVCFSearch          m_vcf_search;
